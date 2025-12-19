@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProVista Hub AI Nexus</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+            "firebase/app": "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js",
+            "firebase/auth": "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js",
+            "firebase/firestore": "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"
+        }
+    }
+    </script>
+
+    <style>
+        .font-sans { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .interactive { pointer-events: auto; }
+        .glass-hub {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 40px 100px -20px rgba(15, 23, 42, 0.15);
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 20px; }
+        @keyframes slide-up {
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-up { animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen w-screen overflow-hidden relative">
+
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useRef } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { initializeApp } from 'firebase/app';
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
+        import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+        const apiKey = ""; 
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'provistahub-assistant-v12';
+
+        const TENANT = {
+            name: "ProVista Hub",
+            whatsapp: "918084843501",
+            phone: "+91 8084843501",
+            email: "provistah@gmail.com",
+            primary: "#5A7863",       
+            accent: "#90AB8B",        
+            secondary: "#EBF4DD",     
+            logoUrl: "https://provistahub.com/favicon.ico" 
+        };
+
+        const SERVICES = [
+            { title: "Web Development", url: "https://provistahub.com/?view=service-detail&serviceId=web-development", desc: "Modern, scalable web engineering." },
+            { title: "UI/UX Design", url: "https://provistahub.com/#ui-ux-design", desc: "Human-centered conversion design." },
+            { title: "App Development", url: "https://provistahub.com/#app-development", desc: "Native & cross-platform solutions." },
+            { title: "Digital Marketing", url: "https://provistahub.com/?view=service-detail&serviceId=digital-marketing", desc: "Data-driven ROI growth." },
+            { title: "AI & Automation", url: "https://provistahub.com/?view=service-detail&serviceId=ai-automation", desc: "Workflow AI integration." },
+            { title: "SEO Services", url: "https://provistahub.com/?view=service-detail&serviceId=seo-services", desc: "Organic visibility strategies." }
+        ];
+
+        const Icons = {
+            Brand: ({ className }) => (
+                <div className={`flex items-center justify-center overflow-hidden rounded-full bg-white shadow-sm border border-slate-100 ${className || "w-10 h-10"}`}>
+                    <img src={TENANT.logoUrl} alt="Logo" className="w-full h-full object-contain p-1" onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=PV&background=5A7863&color=fff`; }} />
+                </div>
+            ),
+            Send: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>,
+            Back: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>,
+            WhatsApp: () => <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2.02c-5.52 0-9.98 4.47-9.98 9.98 0 1.74.45 3.48 1.34 5.01l-1.35 4.92 5.04-1.32c1.46.82 3.13 1.25 4.95 1.25 5.52 0 9.98-4.47 9.98-9.98s-4.47-9.98-9.98-9.98zm0 18.26c-1.6 0-3.18-.38-4.62-1.11-.33-.2-3.42.92-3.34-3.34-.22-.34-.8-1.48-1.22-3.15-1.22-4.88 0-4.54 3.68-8.22 8.22-8.22s8.22 3.68 8.22 8.22-3.68 8.22-8.22 8.22zm4.49-5.83c-.24-.12-.45-.72-.68-.88l-.39-.12-.55.12c-.16.24-.63.79-.78.95-.14.16-.28.18-.52.06s-1.03-.38-1.96-1.21c-.73-.64-1.22-1.43-1.36-1.67s-.03-.36.11-.48c.13-.11.28-.28.42-.42s.18-.28.27-.48.09-.2.09-.45s-.18-.47-.35-.75c-.17-.28-.38-.55-.51-.81-.13-.26-.26-.5-.39-.75-.13-.24-.26-.4-.36-.4s-.2-.01-.3 0c-.1 0-.25.04-.39.2s-.36.38-.36.88 0 1 .16 1.48c.16.48.8 1.45 1.7 2.4s2.1 2.3 3.62 3.2c1.52.9 1.8.9 2.1 1s.6.1 1.1-.1s1.3-.8 1.5-1.5c.2-.7.2-1.3.1-1.5s-.3-.2-.5-.3z"/></svg>,
+            Mic: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>,
+            Phone: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
+            Mail: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
+        };
+
+        const GetInTouchSection = ({ onBack }) => {
+            const [form, setForm] = useState({ name: '', email: '', service: 'General Inquiry', message: '' });
+            const [status, setStatus] = useState('idle');
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setStatus('sending');
+                try {
+                    const db = getFirestore();
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'inquiries'), {
+                        ...form,
+                        timestamp: serverTimestamp()
+                    });
+                    setStatus('success');
+                } catch (err) { setStatus('error'); }
+            };
+
+            if (status === 'success') return (
+                <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-slide-up">
+                    <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4"><svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg></div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">Inquiry Received</h3>
+                    <p className="text-sm text-slate-500 mb-6">A consultant will reach out shortly.</p>
+                    <button onClick={onBack} style={{ background: TENANT.primary }} className="px-8 py-3 text-white rounded-2xl font-bold shadow-lg">Return to Chat</button>
+                </div>
+            );
+
+            return (
+                <div className="flex-1 p-6 animate-slide-up overflow-y-auto custom-scrollbar">
+                    <h2 className="text-xl font-bold text-slate-900 mb-6">Strategic Consultation</h2>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <input required placeholder="Name" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:border-[#5A7863] outline-none" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
+                        <input required type="email" placeholder="Business Email" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:border-[#5A7863] outline-none" value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
+                        <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:border-[#5A7863] outline-none" value={form.service} onChange={e => setForm({...form, service: e.target.value})}>
+                            {SERVICES.map(s => <option key={s.title}>{s.title}</option>)}
+                            <option>General Inquiry</option>
+                        </select>
+                        <textarea required placeholder="Project Vision" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:border-[#5A7863] outline-none h-24" value={form.message} onChange={e => setForm({...form, message: e.target.value})}></textarea>
+                        <button type="submit" disabled={status === 'sending'} style={{ background: TENANT.primary }} className="w-full py-4 text-white rounded-2xl font-bold shadow-lg disabled:opacity-50">
+                            {status === 'sending' ? 'Transmitting...' : 'Submit Inquiry'}
+                        </button>
+                    </form>
+                </div>
+            );
+        };
+
+        const AboutSection = () => (
+            <div className="flex-1 p-6 space-y-6 animate-slide-up overflow-y-auto custom-scrollbar">
+                <div className="text-center space-y-2">
+                    <h2 className="text-xl font-bold text-slate-900 tracking-tight">The Vision</h2>
+                    <p style={{ color: TENANT.primary }} className="text-[10px] uppercase tracking-widest font-bold">Innovation Protocol</p>
+                </div>
+                <div className="space-y-4 text-sm text-slate-600 leading-relaxed text-center">
+                    <p>At <strong>{TENANT.name}</strong>, we empower businesses with future-ready digital solutions.</p>
+                    <div className="p-5 rounded-3xl border border-slate-200 shadow-sm text-left" style={{ background: TENANT.secondary }}>
+                        <h4 className="font-bold text-slate-900 text-xs uppercase tracking-widest mb-3">Leadership</h4>
+                        <div className="space-y-2 text-[11px] font-semibold" style={{ color: TENANT.primary }}>
+                            <p>• Harsh Vishal (Founder & CEO)</p>
+                            <p>• Ravi Shankar Kumar (CIO)</p>
+                            <p>• Samiksha Mehare (COO)</p>
+                            <p>• Manish Kumar Modi (CTO)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const ContactSupportSection = () => (
+            <div className="flex-1 p-6 space-y-6 animate-slide-up overflow-y-auto custom-scrollbar">
+                <div className="text-center space-y-2">
+                    <h2 className="text-xl font-bold text-slate-900 tracking-tight">Support Channels</h2>
+                    <p className="text-xs text-[#5A7863] uppercase tracking-widest font-semibold">Immediate Assistance</p>
+                </div>
+                <div className="space-y-3">
+                    <button onClick={() => window.open(`https://wa.me/${TENANT.whatsapp}`, '_blank')} className="w-full flex items-center p-5 bg-emerald-50 border border-emerald-100 rounded-3xl hover:bg-emerald-100 shadow-sm transition-all text-left">
+                        <div style={{ background: TENANT.primary }} className="w-10 h-10 rounded-2xl flex items-center justify-center text-white mr-4 shadow-lg shrink-0"><Icons.WhatsApp /></div>
+                        <div>
+                            <p className="font-bold text-slate-900 text-sm">Direct WhatsApp</p>
+                            <p className="text-[10px] text-emerald-600 font-medium tracking-tight">Instant Consultation</p>
+                        </div>
+                    </button>
+
+                    <button onClick={() => window.location.href = `tel:${TENANT.phone}`} className="w-full flex items-center p-5 bg-slate-50 border border-slate-100 rounded-3xl hover:bg-slate-100 shadow-sm transition-all text-left">
+                        <div style={{ background: TENANT.primary }} className="w-10 h-10 rounded-2xl flex items-center justify-center text-white mr-4 shadow-lg shrink-0"><Icons.Phone /></div>
+                        <div>
+                            <p className="font-bold text-slate-900 text-sm">Call Specialist</p>
+                            <p className="text-[10px] text-slate-500 font-medium tracking-tight">{TENANT.phone}</p>
+                        </div>
+                    </button>
+
+                    <button onClick={() => window.location.href = `mailto:${TENANT.email}`} className="w-full flex items-center p-5 bg-slate-50 border border-slate-100 rounded-3xl hover:bg-slate-100 shadow-sm transition-all text-left">
+                        <div style={{ background: TENANT.primary }} className="w-10 h-10 rounded-2xl flex items-center justify-center text-white mr-4 shadow-lg shrink-0"><Icons.Mail /></div>
+                        <div>
+                            <p className="font-bold text-slate-900 text-sm">Official Email</p>
+                            <p className="text-[10px] text-slate-500 font-medium tracking-tight">{TENANT.email}</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        );
+
+        const ServicesSection = () => (
+            <div className="flex-1 p-6 space-y-6 animate-slide-up overflow-y-auto custom-scrollbar">
+                <div className="text-center space-y-2">
+                    <h2 className="text-xl font-bold text-slate-900 tracking-tight">Domain Portfolio</h2>
+                    <p style={{ color: TENANT.primary }} className="text-xs uppercase tracking-widest font-semibold">ProVista Hub Digital Ecosystem</p>
+                </div>
+                <div className="space-y-3 pb-4">
+                    {SERVICES.map((s, idx) => (
+                        <div key={idx} style={{ background: `${TENANT.secondary}50`, borderColor: `${TENANT.accent}30` }} className="p-4 rounded-2xl border cursor-pointer shadow-sm active:scale-[0.98]" onClick={() => window.open(s.url, '_blank')}>
+                            <h4 className="font-bold text-slate-900 text-sm">{s.title}</h4>
+                            <p className="text-[11px] text-slate-500 leading-relaxed mt-1">{s.desc}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        function App() {
+            const [isOpen, setIsOpen] = useState(false);
+            const [viewHistory, setViewHistory] = useState(['chat']);
+            const currentView = viewHistory[viewHistory.length - 1];
+            const [messages, setMessages] = useState([]);
+            const [input, setInput] = useState('');
+            const [isRecording, setIsRecording] = useState(false);
+            const [loading, setLoading] = useState(false);
+
+            const scrollRef = useRef(null);
+            const recognitionRef = useRef(null);
+
+            useEffect(() => {
+                if (isOpen && messages.length === 0) {
+                    setMessages([{ 
+                        role: 'ai', 
+                        text: `Strategic Nexus Online. I am Prova, your Digital Architect. How can I assist with your project today?`, 
+                        actions: ['Explore Services', 'Get in Touch'] 
+                    }]);
+                }
+            }, [isOpen]);
+
+            useEffect(() => { scrollRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, currentView]);
+
+            const navigate = (view) => setViewHistory(prev => [...prev, view]);
+
+            const getOfflineAnswer = (q) => {
+                q = q.toLowerCase();
+                if (q.includes('hello') || q.includes('hi')) return { text: "Greetings! I'm Prova. How can I help you navigate ProVista Hub's services today?", actions: ['Explore Services'] };
+                if (q.includes('service') || q.includes('work')) return { text: "We specialize in Web Development, UI/UX, AI, and Marketing. Which domain interests you?", actions: ['Explore Services'] };
+                if (q.includes('price') || q.includes('cost')) return { text: "Our pricing is tailored to project scope. I suggest connecting with our strategy team for a precise quote.", actions: ['Get in Touch'] };
+                if (q.includes('contact') || q.includes('touch') || q.includes('email')) return { text: "You can reach us via WhatsApp, Email, or by filling our inquiry form.", actions: ['Get in Touch', 'Support Channels'] };
+                if (q.includes('location') || q.includes('where')) return { text: "ProVista Hub is based in HiTECH City, Hyderabad, India, serving clients globally.", actions: ['Support Channels'] };
+                return { text: "That sounds interesting. To give you the best advice, I recommend exploring our portfolio or starting a consultation.", actions: ['Explore Services', 'Get in Touch'] };
+            };
+
+            const handleSend = async (text = input) => {
+                const val = text.trim(); 
+                if (!val) return;
+                
+                if (val === 'Explore Services') { navigate('services'); return; }
+                if (val === 'Get in Touch') { navigate('get-in-touch'); return; }
+                if (val === 'Support Channels') { navigate('contact'); return; }
+
+                setMessages(prev => [...prev.filter(m => !m.actions && !m.loading), { role: 'user', text: val }, { role: 'ai', loading: true }]);
+                setInput('');
+                setLoading(true);
+
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: val }] }],
+                            systemInstruction: { parts: [{ text: `You are Prova, the official AI Advisor for ProVista Hub. Be professional, strategic, and concise. Your goal is to guide users to the "Get in Touch" section for business inquiries.` }] }
+                        })
+                    });
+                    
+                    if (!response.ok) throw new Error("API Offline");
+                    
+                    const data = await response.json();
+                    const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    setMessages(prev => [...prev.filter(m => !m.loading), { role: 'ai', text: aiText, actions: ['Explore Services', 'Get in Touch'] }]);
+                } catch (err) {
+                    const fallback = getOfflineAnswer(val);
+                    setMessages(prev => [...prev.filter(m => !m.loading), { role: 'ai', ...fallback }]);
+                } finally { setLoading(false); }
+            };
+
+            const toggleVoiceAssistant = () => {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) return;
+                if (isRecording) { recognitionRef.current?.stop(); return; }
+                const rec = new SpeechRecognition();
+                rec.onstart = () => setIsRecording(true);
+                rec.onend = () => setIsRecording(false);
+                rec.onresult = (e) => handleSend(e.results[0][0].transcript);
+                rec.start();
+                recognitionRef.current = rec;
+            };
+
+            return (
+                <div className="fixed inset-0 pointer-events-none z-50 flex items-end justify-end p-6 font-sans">
+                    <button onClick={() => setIsOpen(!isOpen)} style={{ background: TENANT.primary }} className="interactive w-16 h-16 rounded-3xl text-white flex items-center justify-center shadow-2xl transition-all hover:scale-110 active:scale-95 group relative">
+                        {isOpen ? <span className="text-2xl">×</span> : <Icons.Brand className="w-10 h-10 shadow-none border-none bg-transparent" />}
+                    </button>
+
+                    {isOpen && (
+                        <div className="interactive absolute bottom-24 right-6 w-[400px] max-w-[calc(100vw-48px)] h-[650px] max-h-[calc(100vh-140px)] flex flex-col glass-hub rounded-[32px] animate-slide-up overflow-hidden shadow-2xl">
+                            <div style={{ background: TENANT.primary }} className="p-6 flex items-center justify-between text-white shrink-0">
+                                <div className="flex items-center space-x-3">
+                                    {viewHistory.length > 1 && <button onClick={() => setViewHistory(prev => prev.slice(0, -1))}><Icons.Back /></button>}
+                                    <Icons.Brand className="w-8 h-8" />
+                                    <h3 className="font-bold text-sm">{TENANT.name} AI</h3>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-around bg-slate-50 border-b py-2 shrink-0">
+                                {['chat', 'about', 'services', 'contact', 'get-in-touch'].map(v => (
+                                    <button key={v} onClick={() => setViewHistory([v])} className={`text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg transition-colors ${currentView === v ? 'bg-[#5A7863] text-white' : 'text-slate-400 hover:text-[#5A7863]'}`}>
+                                        {v === 'get-in-touch' ? 'Consult' : v}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="flex-1 overflow-hidden flex flex-col">
+                                {currentView === 'get-in-touch' ? <GetInTouchSection onBack={() => setViewHistory(['chat'])} /> :
+                                 currentView === 'contact' ? <ContactSupportSection /> : 
+                                 currentView === 'about' ? <AboutSection /> : 
+                                 currentView === 'services' ? <ServicesSection /> : (
+                                    <>
+                                        <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-slate-50/50">
+                                            {messages.map((msg, i) => (
+                                                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                                    <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm shadow-sm ${msg.role === 'user' ? 'bg-[#5A7863] text-white rounded-tr-none' : 'bg-white text-slate-800 border border-slate-100 rounded-tl-none'}`}>
+                                                        {msg.loading ? (
+                                                            <div className="flex space-x-1 py-1">
+                                                                <div className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce"></div>
+                                                                <div className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce" style={{animationDelay:'0.2s'}}></div>
+                                                                <div className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce" style={{animationDelay:'0.4s'}}></div>
+                                                            </div>
+                                                        ) : msg.text}
+                                                        {msg.actions?.map((a, ai) => (
+                                                            <button key={ai} onClick={() => handleSend(a)} className="block mt-2 text-[10px] font-bold uppercase border border-emerald-100 bg-emerald-50 text-[#5A7863] px-3 py-2 rounded-xl w-full text-center transition-all hover:bg-emerald-100">{a}</button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            <div ref={scrollRef} />
+                                        </div>
+                                        <div className="p-4 bg-white border-t flex items-center space-x-2 shrink-0">
+                                            <div className="relative flex-1">
+                                                <input value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSend()} placeholder="Consult with Prova..." className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs outline-none focus:border-[#5A7863]" />
+                                                <button onClick={toggleVoiceAssistant} className={`absolute right-3 top-1/2 -translate-y-1/2 ${isRecording ? 'text-red-500' : 'text-slate-400'}`}><Icons.Mic /></button>
+                                            </div>
+                                            <button onClick={() => handleSend()} style={{ background: TENANT.primary }} className="p-3 text-white rounded-xl shadow-lg hover:scale-105 transition-transform"><Icons.Send /></button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
