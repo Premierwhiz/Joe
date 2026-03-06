@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rashmi Enterprises | Premium Storage Solutions</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=Poppins:wght@300;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* =========================================
+           COLOR SYSTEM & DARK MODE VARIABLES
+           ========================================= */
+        :root {
+            --primary: #0A4A22; 
+            --primary-light: #00A859; 
+            --secondary: #12151c; 
+            --accent: #2E7D32; 
+            --accent-light: #4CAF50;
+            
+            /* Light Theme Defaults */
+            --bg-body: #FFFFFF;
+            --bg-section: #f7f9f8;
+            --bg-card: #FFFFFF;
+            --text-main: #222222;
+            --text-muted: #666666;
+            --border-color: #eaeaea;
+            --header-bg: rgba(255, 255, 255, 0.95);
+            --mega-bg: #ffffff;
+            --input-bg: #f0f4f2;
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme Overrides */
+            --bg-body: #0d1117;
+            --bg-section: #161b22;
+            --bg-card: #1c2128;
+            --text-main: #f0f6fc;
+            --text-muted: #8b949e;
+            --border-color: #30363d;
+            --header-bg: rgba(13, 17, 23, 0.95);
+            --mega-bg: #161b22;
+            --input-bg: #21262d;
+            --primary: #00A859; /* Brighten primary for dark mode readability */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { overflow-x: hidden; cursor: none; } /* Hide default cursor for custom follower */
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 16px; color: var(--text-main);
+            line-height: 1.7; overflow-x: hidden; background-color: var(--bg-body);
+            overscroll-behavior: none;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; font-weight: 700; line-height: 1.2; color: var(--primary); }
+        [data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] h4 { color: #ffffff; }
+        
+        h1 { font-size: 56px; color: #ffffff !important; letter-spacing: -0.5px; }
+        h2 { font-size: 40px; margin-bottom: 20px; }
+        h3 { font-size: 28px; }
+        p { margin-bottom: 15px; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .section { padding-top: 100px; padding-bottom: 100px; }
+        .section-light { background-color: var(--bg-section); transition: background-color 0.4s ease;}
+
+        /* =========================================
+           SCROLL PROGRESS BAR
+           ========================================= */
+        #scroll-progress {
+            position: fixed; top: 0; left: 0; width: 0%; height: 4px;
+            background: linear-gradient(90deg, #00A859, #4CAF50, #81C784);
+            z-index: 10001; transition: width 0.1s ease-out;
+            box-shadow: 0 0 10px rgba(0, 168, 89, 0.5);
+        }
+
+        /* =========================================
+           CUSTOM CURSOR
+           ========================================= */
+        @media (pointer: fine) {
+            .cursor-dot {
+                position: fixed; top: 0; left: 0; width: 8px; height: 8px;
+                background: var(--primary-light); border-radius: 50%;
+                pointer-events: none; z-index: 99999;
+                transform: translate(-50%, -50%); transition: opacity 0.3s;
+                box-shadow: 0 0 10px var(--primary-light);
+            }
+            .cursor-ring {
+                position: fixed; top: 0; left: 0; width: 40px; height: 40px;
+                border: 2px solid rgba(0, 168, 89, 0.5); border-radius: 50%;
+                pointer-events: none; z-index: 99998;
+                transform: translate(-50%, -50%);
+                transition: width 0.2s, height 0.2s, background 0.2s, border-color 0.2s;
+            }
+            body.cursor-hover .cursor-ring {
+                width: 65px; height: 65px; background: rgba(0, 168, 89, 0.1);
+                border-color: var(--primary-light); backdrop-filter: blur(2px);
+            }
+        }
+        @media (max-width: 768px) { html { cursor: auto; } .cursor-dot, .cursor-ring { display: none; } }
+
+        /* =========================================
+           PREMIUM LOADER & PAGE TRANSITION
+           ========================================= */
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0A4A22; z-index: 9999; display: flex; align-items: center; justify-content: center;
+            flex-direction: column; color: white; font-family: 'Poppins'; font-weight: 800; font-size: 32px;
+        }
+        .loader-line { width: 0%; height: 3px; background: #4CAF50; margin-top: 20px; border-radius: 3px;}
+        .transition-overlay { position: fixed; top: 100%; left: 0; width: 100%; height: 100vh; background: #00A859; z-index: 2001; pointer-events: none; }
+
+        /* =========================================
+           BUTTONS
+           ========================================= */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+            font-size: 16px; font-family: 'Poppins', sans-serif; font-weight: 600;
+            padding: 14px 28px; border-radius: 6px; text-decoration: none; cursor: pointer;
+            border: none; position: relative;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease; 
+        }
+        .btn-primary { background-color: var(--primary-light); color: #ffffff; }
+        .btn-primary:hover { background-color: var(--primary); box-shadow: 0 10px 30px rgba(10, 74, 34, 0.3); }
+        .btn-outline { background-color: transparent; border: 2px solid var(--primary-light); color: var(--primary-light); }
+        .btn-outline:hover { background-color: var(--primary-light); color: #ffffff; box-shadow: 0 10px 30px rgba(10, 74, 34, 0.2);}
+
+        .btn-hero-dark { background-color: #1a4f2c; color: white; border-radius: 6px; padding: 18px 40px;}
+        .btn-hero-dark:hover { background-color: #0d3019; box-shadow: 0 15px 30px rgba(0,0,0,0.4);}
+        .btn-hero-light { background-color: var(--primary-light); color: white; border-radius: 6px; padding: 18px 40px;}
+        .btn-hero-light:hover { background-color: var(--primary); box-shadow: 0 15px 30px rgba(0,0,0,0.4);}
+
+        .btn-whatsapp-direct { background-color: #25D366; color: white; border-radius: 8px; padding: 18px 40px; box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3); transition: all 0.3s; width: 100%; font-size: 18px;}
+        .btn-whatsapp-direct:hover { background-color: #1EBE57; transform: translateY(-3px); box-shadow: 0 15px 25px rgba(37, 211, 102, 0.4); }
+
+        /* =========================================
+           SPA ROUTING STYLES
+           ========================================= */
+        .page-view { display: none; opacity: 0; min-height: 80vh; padding-top: 85px; } 
+        #page-home { padding-top: 0; } 
+        .page-view.active { display: block; opacity: 1; }
+
+        .page-header { background: linear-gradient(to right, var(--primary), #1a4f2c); color: white; padding: 100px 0; text-align: center; margin-bottom: 60px; border-radius: 0 0 20px 20px; }
+        .page-header h1 { font-size: 52px; margin-bottom: 15px; color: white !important;}
+        .page-header p { font-size: 18px; opacity: 0.9; max-width: 700px; margin: 0 auto; color: white;}
+
+        /* =========================================
+           HEADER & NAVIGATION
+           ========================================= */
+        header { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 85px;
+            background-color: var(--header-bg); backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.06); 
+            z-index: 1000; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+            display: flex; align-items: center; border-bottom: 1px solid var(--border-color);
+        }
+        header .container { width: 100%; display: flex; justify-content: space-between; align-items: center; height: 100%; position: relative;}
+
+        .logo-container { display: flex; align-items: center; text-decoration: none; gap: 8px; position: relative;}
+        .logo-glow { position: absolute; width: 140px; height: 70px; background: rgba(0, 168, 89, 0.25); filter: blur(35px); z-index: -1; border-radius: 50%; left: -20px; top: -10px; }
+        .logo-mark { width: 40px; height: 50px; position: relative; background: transparent; }
+        .logo-mark::before { content: ''; position: absolute; top: 0; left: 0; width: 22px; height: 100%; background-color: var(--primary-light); border-radius: 22px 22px 0 22px; }
+        .logo-mark::after { content: 'E'; position: absolute; top: 50%; right: -5px; transform: translateY(-50%); font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 38px; color: var(--text-main); line-height: 1; transition: color 0.4s;}
+        .logo-text { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 800; color: var(--primary-light); line-height: 1; display: flex; flex-direction: column; text-transform: capitalize; }
+        .logo-text span { color: var(--primary-light); font-size: 22px; font-weight: 800; margin-top: 0px;}
+
+        .top-nav { display: flex; align-items: center; gap: 35px; height: 100%; margin-left: auto; margin-right: 30px;}
+        .nav-item { height: 100%; display: flex; align-items: center; position: relative;}
+        
+        .nav-link { 
+            text-decoration: none; color: var(--text-main); font-weight: 700; 
+            font-family: 'Poppins', sans-serif; transition: color 0.3s; position: relative; 
+            font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; 
+            padding: 8px 0; display: inline-block;
+        }
+        .nav-link::after { 
+            content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 3px; 
+            background: var(--primary-light); transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+            border-radius: 2px;
+        }
+        .nav-link.active { color: var(--primary-light); }
+        .nav-link.active::after, .nav-link:hover::after, .nav-item:hover .nav-link::after { width: 100%; }
+        .nav-link:hover, .nav-item:hover .nav-link { color: var(--primary-light); }
+
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+
+        .search-container { position: relative; display: flex; align-items: center; background: var(--input-bg); border-radius: 30px; overflow: hidden; padding: 4px; transition: background 0.4s;}
+        .search-container i { position: absolute; left: 15px; color: var(--text-muted); font-size: 13px; z-index: 2;}
+        .search-container input { padding: 6px 15px 6px 35px; border: none; font-size: 13px; width: 140px; outline: none; background: transparent; font-family: 'Open Sans', sans-serif; color: var(--text-main);}
+
+        .lang-toggle { display: flex; align-items: center; background: var(--input-bg); border-radius: 30px; padding: 4px; border: 1px solid var(--border-color); transition: background 0.4s, border-color 0.4s;}
+        .lang-btn { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--text-main); transition: all 0.3s ease; font-family: 'Poppins', sans-serif;}
+        .lang-btn.active { background: var(--primary-light); color: white; box-shadow: 0 4px 10px rgba(0, 168, 89, 0.25); }
+
+        /* Dark Mode Toggle Icon */
+        .theme-toggle-btn { background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s;}
+        .theme-toggle-btn:hover { background: var(--primary-light); color: white;}
+
+        .btn-nav-contact { background: var(--primary-light); color: white; padding: 10px 24px; border-radius: 30px; font-weight: 700; font-family: 'Poppins'; font-size: 15px; text-decoration: none; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 4px 15px rgba(0, 168, 89, 0.25); }
+        .btn-nav-contact:hover { background: var(--primary); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 168, 89, 0.4); color: white;}
+
+        /* =========================================
+           ADVANCED COLUMN MEGA MENU (FIXED FULL WIDTH)
+           ========================================= */
+        .mega-menu {
+            position: fixed; top: 85px; left: 0; width: 100vw; background: var(--mega-bg);
+            border-top: 1px solid var(--border-color); box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            padding: 40px 0 30px 0; opacity: 0; visibility: hidden;
+            transform: translateY(10px); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 1000;
+        }
+        .nav-item.mega-trigger:hover .mega-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+        
+        body::before {
+            content: ''; position: fixed; top: 85px; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(6px);
+            z-index: 998; opacity: 0; visibility: hidden; transition: all 0.4s ease;
+            pointer-events: none;
+        }
+        body:has(.nav-item.mega-trigger:hover)::before { opacity: 1; visibility: visible; }
+
+        .mega-grid { display: flex; justify-content: space-between; gap: 40px; width: 100%;}
+        .mega-col { flex: 1; display: flex; flex-direction: column;}
+        .mega-col.preview-col { flex: 1.2; justify-content: center;}
+
+        .mega-col h4 { font-size: 16px; color: var(--primary-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 25px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;}
+        .mega-col ul { list-style: none; }
+        .mega-col ul li { margin-bottom: 15px; }
+        .mega-link { color: var(--text-main); text-decoration: none; font-size: 15px; font-weight: 600; transition: all 0.2s; display: inline-block; position: relative;}
+        .mega-link:hover { color: var(--primary-light); transform: translateX(6px); }
+        
+        .mega-preview-image { width: 100%; height: 240px; border-radius: 12px; overflow: hidden; background: var(--input-bg); box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border-color);}
+        .mega-preview-image img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .mega-footer-link { display: block; text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); color: var(--text-main); font-weight: 800; text-decoration: none; text-transform: uppercase; letter-spacing: 1px;}
+        .mega-footer-link:hover { color: var(--primary-light); }
+
+        /* =========================================
+           HOME HERO SECTION
+           ========================================= */
+        .hero {
+            height: 100vh; position: relative; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden;
+            background: linear-gradient(135deg, #112d1b 0%, #0d2114 50%, #07120a 100%);
+        }
+        .hero-video-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; overflow: hidden; }
+        .hero-video { position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; transform: translate(-50%, -50%); object-fit: cover; opacity: 0.3; mix-blend-mode: overlay; will-change: transform;}
+        .hero-content { z-index: 1; width: 100%; margin-top: 60px; }
+        .hero h1 { max-width: 1000px; margin: 0 auto 15px auto; font-size: 72px; line-height: 1.1; font-weight: 800; text-shadow: 0 5px 20px rgba(0,0,0,0.5);}
+        .hero p { color: rgba(255,255,255,0.9); font-size: 20px; max-width: 800px; margin: 0 auto 40px auto; font-weight: 400;}
+        .hero-buttons { display: flex; gap: 20px; justify-content: center; }
+
+        /* =========================================
+           3D RACK CONFIGURATOR
+           ========================================= */
+        .config-wrapper { display: grid; grid-template-columns: 1fr 2fr; gap: 0; background: var(--bg-card); border-radius: 16px; box-shadow: 0 30px 60px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid var(--border-color); margin-top: 40px; transition: background 0.4s, border-color 0.4s;}
+        .config-controls { padding: 50px; display: flex; flex-direction: column; gap: 30px; border-right: 1px solid var(--border-color); }
+        .config-controls h3 { font-size: 32px; margin-bottom: 20px; }
+        
+        .slider-group { position: relative; margin-bottom: 10px;}
+        .slider-group .labels { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;}
+        .slider-group label { font-size: 18px; font-weight: 500; color: var(--text-main); }
+        .sync-input { width: 90px; padding: 4px; border: none; background: transparent; font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; color: var(--primary-light); text-align: right; outline: none; }
+        
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: var(--primary-light); cursor: pointer; margin-top: -10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.2s;}
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: var(--border-color); border-radius: 2px; }
+
+        .btn-quote-config { background: #1a4f2c; color: white; padding: 18px; width: 100%; font-size: 18px; border-radius: 8px; border: none; font-family: 'Poppins'; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; position: relative;}
+
+        .canvas-container { width: 100%; height: 100%; min-height: 550px; background: radial-gradient(circle at center, var(--bg-card) 0%, var(--bg-section) 100%); position: relative; cursor: grab; }
+        .canvas-container:active { cursor: grabbing; }
+        .canvas-hint { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--secondary); color: white; padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 600; pointer-events: none; letter-spacing: 1px;}
+
+        /* =========================================
+           TOP NOTCH STATS ANIMATION
+           ========================================= */
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); background: #0b3d1f; padding: 60px 20px; border-radius: 16px; text-align: center; margin: 60px 0; box-shadow: 0 20px 40px rgba(11, 61, 31, 0.2); position: relative; overflow: hidden;}
+        .stat-box { display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transform: scale(0.8); filter: blur(10px);} 
+        .stat-box h3 { font-size: 60px; margin-bottom: 5px; font-family: 'Poppins', sans-serif; font-weight: 800; line-height: 1.1; 
+            background: linear-gradient(90deg, #4CAF50, #81C784); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-box p { font-size: 14px; font-weight: 600; color: white; text-transform: uppercase; letter-spacing: 1px; font-family: 'Open Sans', sans-serif;}
+
+        /* =========================================
+           TESTIMONIALS (NEW)
+           ========================================= */
+        .testimonial-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 40px;}
+        .testimonial-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 40px 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: transform 0.3s; display: flex; flex-direction: column; justify-content: space-between;}
+        .testimonial-card:hover { transform: translateY(-10px); border-color: var(--primary-light);}
+        .stars { color: #FFD700; font-size: 14px; margin-bottom: 20px; display: flex; gap: 4px;}
+        .review-text { font-size: 16px; color: var(--text-main); font-style: italic; margin-bottom: 30px; line-height: 1.8;}
+        .client-info { display: flex; align-items: center; gap: 15px;}
+        .client-avatar { width: 50px; height: 50px; border-radius: 50%; background: var(--input-bg); display: flex; align-items: center; justify-content: center; color: var(--primary-light); font-weight: 800; font-size: 20px; font-family: 'Poppins';}
+        .client-details h5 { margin: 0; font-size: 16px; color: var(--text-main);}
+        .client-details span { font-size: 13px; color: var(--text-muted);}
+
+        /* =========================================
+           WHY CHOOSE US & FAQ
+           ========================================= */
+        .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 40px; }
+        .feature-box { background: var(--bg-card); padding: 40px 30px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; transition: transform 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.02);}
+        .feature-box:hover { transform: translateY(-8px); border-color: var(--primary-light); }
+        .feature-icon { width: 80px; height: 80px; background: rgba(0,168,89,0.1); color: var(--primary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 20px auto; }
+        .feature-box h3 { font-size: 22px; margin-bottom: 15px; color: var(--text-main);}
+        .feature-box p { font-size: 15px; color: var(--text-muted); }
+
+        .faq-section { background: var(--bg-body); padding: 80px 0; transition: background 0.4s;}
+        .faq-container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+        .faq-item { background: var(--bg-card); border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.02); overflow: hidden; transition: all 0.3s; border: 1px solid var(--border-color);}
+        .faq-question { padding: 25px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-family: 'Poppins'; color: var(--text-main); font-size: 18px; transition: color 0.3s;}
+        .faq-question:hover { color: var(--primary-light); }
+        .faq-answer { padding: 0 25px; max-height: 0; overflow: hidden; transition: all 0.4s ease; color: var(--text-muted); line-height: 1.8; font-size: 15px;}
+        .faq-item.active .faq-answer { padding: 0 25px 25px; max-height: 500px; }
+        .faq-item.active { box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-left: 4px solid var(--primary-light); }
+        .faq-icon { transition: transform 0.4s ease; color: var(--primary-light);}
+        .faq-item.active .faq-icon { transform: rotate(180deg); }
+
+        /* =========================================
+           PRODUCT GRID & CARDS 
+           ========================================= */
+        .product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 40px; perspective: 1000px;}
+        .product-card { 
+            background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); 
+            height: 480px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-style: preserve-3d;
+        }
+        .product-card:hover { 
+            transform: translateY(-12px) rotateX(2deg) rotateY(2deg); 
+            box-shadow: 0 30px 60px rgba(0,168,89,0.15); border-color: var(--primary-light); 
+        }
+        .img-wrapper { height: 260px; overflow: hidden; position: relative;}
+        .product-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .product-card:hover .product-image { transform: scale(1.12); }
+        .product-category { position: absolute; top: 20px; left: 20px; background: var(--primary-light); color: white; padding: 6px 16px; border-radius: 30px; font-size: 11px; font-weight: 800; text-transform: uppercase; z-index: 2; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);}
+        .product-info { padding: 30px; text-align: left; display: flex; flex-direction: column; flex-grow: 1; background: linear-gradient(to bottom, transparent, var(--bg-section));}
+        .product-info h3 { font-size: 22px; color: var(--text-main); margin-bottom: 12px; transition: color 0.3s;}
+        .product-card:hover .product-info h3 { color: var(--primary-light); }
+        .product-info p { font-size: 15px; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 15px; line-height: 1.6;}
+        .product-info .view-more { margin-top: auto; color: var(--primary-light); font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .product-card:hover .view-more i { transform: translateX(8px); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);}
+
+        /* =========================================
+           SINGLE PRODUCT PAGE
+           ========================================= */
+        .single-product-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-bottom: 80px;}
+        .sp-image-container { border-radius: 16px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.1); border: 1px solid var(--border-color);}
+        .sp-image-container img { width: 100%; height: 100%; object-fit: cover;}
+        .sp-details { padding-top: 20px; }
+        .sp-category { color: var(--primary-light); font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; display: inline-block; background: rgba(0,168,89,0.1); padding: 6px 18px; border-radius: 30px; font-size: 13px;}
+        .sp-title { font-size: 48px; margin-bottom: 25px; line-height: 1.1; color: var(--text-main);}
+        .sp-desc { font-size: 18px; color: var(--text-muted); margin-bottom: 40px; line-height: 1.8;}
+        .sp-specs { list-style: none; margin-bottom: 40px; background: var(--bg-section); padding: 40px; border-radius: 12px; border: 1px solid var(--border-color);}
+        .sp-specs li { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding: 15px 0; font-weight: 600; color: var(--text-main); font-size: 17px;}
+        .sp-specs li:last-child { border-bottom: none; }
+        .sp-specs li span { color: var(--text-muted); font-weight: 500; text-align: right;}
+        
+        /* =========================================
+           POWER MOVE FOOTER & MODERN MARQUEE
+           ========================================= */
+        .pre-footer-cta { background: linear-gradient(135deg, #0A4A22 0%, #117843 100%); padding: 80px 0; color: white; position: relative; overflow: hidden;}
+        .pre-footer-cta::before { content:''; position:absolute; top:-50%; left:-10%; width:50%; height:200%; background:rgba(255,255,255,0.05); transform:rotate(30deg); pointer-events:none;}
+        .pre-footer-cta-inner { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;}
+        .pre-footer-cta-inner h2 { color: white !important; font-size: 42px; margin-bottom: 10px; font-family: 'Poppins', sans-serif;}
+        .pre-footer-cta-inner p { font-size: 18px; opacity: 0.9; margin: 0; font-family: 'Open Sans', sans-serif; color: white;}
+        
+        .client-logos-section { background: var(--bg-section); padding: 60px 0; border-bottom: 1px solid var(--border-color); overflow: hidden; transition: background 0.4s;}
+        .marquee-wrapper {
+            display: flex; overflow: hidden; user-select: none; gap: 4rem;
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+        .marquee-wrapper:hover .marquee-content { animation-play-state: paused; }
+        .marquee-content { display: flex; flex-shrink: 0; align-items: center; justify-content: space-around; gap: 4rem; min-width: 100%; animation: scrollX 25s linear infinite; }
+        .marquee-content i { font-size: 56px; color: var(--text-muted); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; opacity: 0.5;}
+        .marquee-content i:hover { color: var(--primary-light); transform: scale(1.2) translateY(-8px); filter: drop-shadow(0 15px 20px rgba(0, 168, 89, 0.4)); opacity: 1;}
+        @keyframes scrollX { from { transform: translateX(0); } to { transform: translateX(calc(-100% - 4rem)); } }
+
+        .site-footer { background-color: var(--secondary); color: #b0b0b0; padding: 80px 0 20px 0; font-size: 14px; font-family: 'Open Sans', sans-serif; position: relative;}
+        .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1.5fr 1.2fr; gap: 50px; margin-bottom: 60px; }
+        .footer-col h4 { color: white !important; font-size: 18px; margin-bottom: 25px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; position: relative; padding-bottom: 10px;}
+        .footer-col h4::after { content: ''; position: absolute; left: 0; bottom: 0; width: 40px; height: 3px; background: var(--primary-light); border-radius: 2px;}
+        
+        .footer-logo { display: inline-flex; align-items: center; margin-bottom: 20px; gap: 8px;}
+        .footer-logo .logo-mark { width: 30px; height: 35px; background: transparent; position: relative;}
+        .footer-logo .logo-mark::before { content:''; position: absolute; left:0; top:0; height:100%; width: 16px; background:#00A859; border-radius: 16px 16px 0 16px; }
+        .footer-logo .logo-mark::after { content:'E'; position: absolute; right:-2px; top:50%; transform:translateY(-50%); font-size: 28px; font-family: 'Poppins'; font-weight: 800; color: white; line-height: 1; }
+        .footer-logo .logo-text { font-size: 18px; line-height: 1.1; font-family: 'Poppins'; font-weight: 800; color: white; text-transform: capitalize;}
+        .footer-logo .logo-text span { color: var(--primary-light); font-size: 18px; display: block; margin-top: -2px;}
+        
+        .footer-factory-img { 
+            width: 100%; max-width: 280px; height: 140px; border-radius: 12px; object-fit: cover; 
+            margin-top: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
+            border: 2px solid rgba(255,255,255,0.05); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .footer-factory-img:hover { transform: scale(1.05); border-color: var(--primary-light); box-shadow: 0 15px 35px rgba(0, 168, 89, 0.3); }
+
+        .footer-links { list-style: none; }
+        .footer-links li { margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;}
+        .footer-links li:last-child { border-bottom: none; }
+        .footer-links a { color: #b0b0b0; text-decoration: none; transition: all 0.3s; display: flex; align-items: center; gap: 10px; cursor: pointer;}
+        .footer-links a:hover { color: white; transform: translateX(8px); }
+        .footer-links a i { color: var(--primary-light); font-size: 12px;}
+
+        .footer-product-link { display: flex; align-items: center; gap: 15px; text-decoration: none; color: #b0b0b0; transition: all 0.3s; padding: 10px; border-radius: 8px;}
+        .footer-product-link:hover { background: rgba(255,255,255,0.05); color: white; transform: translateX(5px);}
+        .footer-product-img { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid #333;}
+        .footer-product-info h5 { margin: 0; font-size: 14px; color: white; font-family: 'Poppins'; margin-bottom: 2px;}
+        .footer-product-info p { margin: 0; font-size: 12px; color: #888; font-family: 'Open Sans';}
+
+        .footer-contact li { display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-start;}
+        .footer-contact i { color: var(--primary-light); font-size: 20px; margin-top: 4px; }
+        .google-map-embed { width: 100%; height: 150px; border-radius: 8px; border: none; margin-top: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);}
+
+        .footer-bottom { border-top: 1px solid #2a2e35; padding-top: 25px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #777; }
+        .footer-bottom-links a { color: #777; text-decoration: none; margin-left: 20px; transition: color 0.3s;}
+        .footer-bottom-links a:hover { color: var(--primary-light); }
+
+        /* =========================================
+           FLOATING WHATSAPP PULSE
+           ========================================= */
+        .floating-actions { position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 15px; z-index: 999; }
+        .float-btn { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 30px; text-decoration: none; box-shadow: 0 10px 25px rgba(0,0,0,0.3); transition: transform 0.3s; }
+        .float-btn:hover { transform: scale(1.1); }
+        .float-wa { background-color: #25D366; animation: pulse-green 2s infinite; }
+        .float-mail { background-color: #0078FF; }
+        
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(37, 211, 102, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+        }
+
+        /* =========================================
+           POPUP
+           ========================================= */
+        .popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2500; opacity: 0; backdrop-filter: blur(10px); }
+        .popup-content { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); 
+            width: 95%; max-width: 1000px; border-radius: 16px; display: flex; overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5); background: var(--bg-card);
+        }
+        .popup-close { position: absolute; top: 20px; right: 25px; background: none; border: none; font-size: 32px; color: #999; cursor: pointer; transition: color 0.3s; z-index: 10;}
+        .popup-close:hover { color: var(--primary-light); transform: rotate(90deg);}
+
+        .popup-left { background: var(--bg-body); padding: 70px 60px; width: 45%; display: flex; flex-direction: column; justify-content: center;}
+        .popup-right { background: var(--bg-section); padding: 70px 60px; width: 55%; border-left: 1px solid var(--border-color);}
+        
+        .popup-subtitle { color: var(--primary-light); font-weight: 800; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 15px;}
+        .popup-title { font-size: 48px; line-height: 1.1; margin-bottom: 35px; color: var(--text-main); font-family: 'Poppins', sans-serif; position: relative; padding-bottom: 20px;}
+        .popup-title::after { content: ''; position: absolute; left: 0; bottom: 0; width: 70px; height: 5px; background: var(--primary-light); border-radius: 3px;}
+        .popup-title span { color: var(--primary-light); }
+
+        .popup-info-list { list-style: none; margin-top: 15px; }
+        .popup-info-list li { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; font-weight: 600; color: var(--text-muted); font-size: 17px;}
+        .popup-info-icon { width: 50px; height: 50px; border-radius: 50%; background: rgba(0,168,89,0.1); color: var(--primary-light); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+
+        .quote-input-group { position: relative; margin-bottom: 25px; }
+        .quote-input-group i { position: absolute; left: 20px; top: 18px; color: var(--text-muted); font-size: 18px; }
+        .quote-input-group input, .quote-input-group select, .quote-input-group textarea {
+            width: 100%; padding: 18px 18px 18px 55px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-body); outline: none; font-family: 'Open Sans'; font-size: 16px; color: var(--text-main); transition: all 0.3s;
+        }
+        .quote-input-group input:focus, .quote-input-group select:focus, .quote-input-group textarea:focus { border-color: var(--primary-light); box-shadow: 0 0 0 4px rgba(0, 168, 89, 0.1);}
+        
+        .quote-submit-btn {
+            background: var(--primary-light); color: white; border: none; padding: 20px; width: 100%; border-radius: 10px; font-size: 20px; font-weight: 800; font-family: 'Poppins'; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 15px; position: relative;
+        }
+
+        /* Responsive Layouts */
+        @media (max-width: 992px) {
+            .config-wrapper { grid-template-columns: 1fr; }
+            .canvas-container { height: 400px; min-height: 400px;}
+            .product-grid { grid-template-columns: 1fr 1fr; }
+            .single-product-layout { grid-template-columns: 1fr; }
+            .popup-content { flex-direction: column; max-height: 90vh; overflow-y: auto; width: 90%;}
+            .popup-left, .popup-right { width: 100%; padding: 40px 30px; }
+            .header-actions { gap: 10px; }
+            .search-container { display: none; }
+            .top-nav { gap: 15px;}
+            .mega-grid { flex-direction: column; gap: 20px;}
+            .mega-preview-image { display: none; }
+            .pre-footer-cta-inner { flex-direction: column; text-align: center; gap: 30px;}
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+            .testimonial-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .top-nav, .lang-toggle { display: none; }
+            .hero h1 { font-size: 42px !important; }
+            .product-grid { grid-template-columns: 1fr; }
+            .stats-row { grid-template-columns: 1fr 1fr; gap: 40px;}
+            .mega-menu { display: none !important; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; gap: 15px; text-align: center;}
+            .footer-bottom-links a { margin: 0 10px; }
+            .logo-text span { font-size: 16px;}
+            .logo-text { font-size: 16px;}
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Scroll Progress Bar -->
+    <div id="scroll-progress"></div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-ring"></div>
+
+    <!-- Premium Load Animation -->
+    <div id="loader">
+        <div style="display:flex; align-items:center; gap: 10px;">
+            <div class="logo-mark" style="width: 50px; height: 60px;">
+                <div style="position: absolute; top: 0; left: 0; width: 28px; height: 100%; background-color: white; border-radius: 28px 28px 0 28px;"></div>
+                <div style="position: absolute; top: 50%; right: -8px; transform: translateY(-50%); font-family: 'Poppins'; font-weight: 800; font-size: 48px; color: white; line-height: 1;">E</div>
+            </div>
+            RASHMI ENTERPRISES
+        </div>
+        <div class="loader-line"></div>
+    </div>
+
+    <!-- Framer Cinematic Page Transition Overlay -->
+    <div class="transition-overlay"></div>
+
+    <!-- REDESIGNED CINEMATIC HEADER -->
+    <header id="site-header">
+        <div class="container">
+            <a href="#" onclick="navigateTo('page-home'); return false;" class="logo-container magnetic-btn">
+                <div class="logo-glow"></div>
+                <div class="logo-mark"></div>
+                <div class="logo-text">Rashmi<br><span>Enterprises</span></div>
+            </a>
+            
+            <nav class="top-nav">
+                <div class="nav-item">
+                    <a href="#" onclick="navigateTo('page-home'); return false;" class="nav-link active" data-target="page-home" data-i18n="nav-home">HOME</a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" onclick="navigateTo('page-about'); return false;" class="nav-link" data-target="page-about" data-i18n="nav-company">COMPANY</a>
+                </div>
+                
+                <!-- Mega Menu Trigger (Fixed Full Width) -->
+                <div class="nav-item mega-trigger">
+                    <a href="#" class="nav-link" onclick="navigateTo('page-products'); return false;" data-target="page-products"><span data-i18n="nav-products">PRODUCTS</span> <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i></a>
+                    
+                    <div class="mega-menu">
+                        <div class="container mega-grid">
+                            <!-- Column 1 -->
+                            <div class="mega-col">
+                                <h4 data-i18n="cat-heavy"><i class="fa-solid fa-box"></i> Heavy Duty Racks</h4>
+                                <ul>
+                                    <li><a href="#" class="mega-link" data-img="https://images.unsplash.com/photo-1604719312566-8912e9227c6a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" onclick="viewProduct('heavy-duty'); return false;" data-i18n="prod-pallet">Pallet Racks</a></li>
+                                    <li><a href="#" class="mega-link" data-img="https://images.unsplash.com/photo-1565610222536-ce127147bfa6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" onclick="viewProduct('cantilever'); return false;" data-i18n="prod-cantilever">Cantilever Racks</a></li>
+                                    <li><a href="#" class="mega-link" data-img="https://images.unsplash.com/photo-1578575437130-527eed3abbec?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" onclick="viewProduct('drive-in'); return false;" data-i18n="prod-drive">Drive-In Racks</a></li>
+                                    <li><a href="#" class="mega-link" data-img="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" onclick="viewProduct('heavy-duty-shelving'); return false;" data-i18n="prod-heavy-shelf">Heavy Duty Shelving</a></li>
+                                </ul>
+                            </div>
+
+                            <!-- Column 2 -->
+                            <div class="mega-col">
+                                <h4 data-i18n="cat-storage"><i class="fa-solid fa-server"></i> Storage Systems</h4>
+                                <ul>
+                                    <li><a href="#" class="mega-link" data-img="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" onclick="viewProduct('slotted-angle'); return false;" data-i18n="prod-slotted">Slotted Angle</a></li>
+                                    <li><a href="#" class="mega-link" data-img="https://images.unsplash.com/photo-1587293852726-694364abdf47?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" onclick="viewProduct('mobile-compactor'); return false;" data-i18n="prod-compactor">Mobile Compactor</a></li>
+                                    <li><a href="#" class="mega-link" data-img="https://images.unsplash.com/photo-1507208538289-4e61c3605e5e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" onclick="viewProduct('pigeon-hole'); return false;" data-i18n="prod-pigeon">Pigeon Hole</a></li>
+                                    <li><a href="#" class="mega-link" data-img="https://images.unsplash.com/photo-1553413077-190dd305871c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" onclick="viewProduct('multi-tier'); return false;" data-i18n="prod-multi">Multi Tier</a></li>
+                                </ul>
+                            </div>
+
+                            <!-- Column 3 -->
+                            <div class="mega-col">
+                                <h4 data-i18n="cat-lockers"><i class="fa-solid fa-lock"></i> Staff Lockers</h4>
+                                <ul>
+                                    <li><a href="#" class="mega-link" data-img="https://images.unsplash.com/photo-1595844730298-b960fa25e648?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" onclick="viewProduct('locker-6'); return false;" data-i18n="prod-lock6">6 Door Locker</a></li>
+                                    <li><a href="#" class="mega-link" data-img="https://images.unsplash.com/photo-1555529771-835f59bfc50c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" onclick="viewProduct('locker-12'); return false;" data-i18n="prod-lock12">12 Door Locker</a></li>
+                                    <li><a href="#" class="mega-link" data-img="https://images.unsplash.com/photo-1555529771-835f59bfc50c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" onclick="viewProduct('custom-locker'); return false;" data-i18n="prod-lockcus">Custom Locker</a></li>
+                                </ul>
+                            </div>
+
+                            <!-- Image Preview Column -->
+                            <div class="mega-col preview-col">
+                                <div class="mega-preview-image">
+                                    <img id="mega-preview-img" src="https://images.unsplash.com/photo-1604719312566-8912e9227c6a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Product Preview">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="container">
+                            <a href="#" onclick="navigateTo('page-products'); return false;" class="mega-footer-link" data-i18n="btn-view-all">View All Catalogue <i class="fa-solid fa-arrow-right" style="margin-left:5px;"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nav-item">
+                    <a href="#" onclick="navigateTo('page-blog'); return false;" class="nav-link" data-target="page-blog" data-i18n="nav-blogs">BLOGS</a>
+                </div>
+            </nav>
+
+            <div class="header-actions">
+                <div class="search-container">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="global-search" placeholder="Search..." onkeypress="handleSearch(event)">
+                </div>
+
+                <!-- Theme Toggle -->
+                <button id="theme-toggle-btn" class="theme-toggle-btn magnetic-btn" title="Toggle Dark Mode">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+
+                <!-- Translating Toggle Working -->
+                <div class="lang-toggle">
+                    <div class="lang-btn active" onclick="toggleLang('en', this)">EN</div>
+                    <div class="lang-btn" onclick="toggleLang('hi', this)">हिन्दी</div>
+                </div>
+
+                <a href="#" onclick="openPopup(); return false;" class="btn-nav-contact magnetic-btn" data-i18n="nav-contact">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <main id="app-content">
+
+        <!-- ==============================================
+             PAGE: HOME 
+             ============================================== -->
+        <section id="page-home" class="page-view active">
+            <div class="hero">
+                <div class="hero-video-wrapper">
+                    <video class="hero-video" autoplay loop muted playsinline>
+                        <source src="https://cdn.pixabay.com/video/2021/08/11/84687-587848658_tiny.mp4" type="video/mp4">
+                    </video>
+                </div>
+                
+                <div class="container hero-content gsap-reveal">
+                    <h1 data-i18n="hero-title">Premium Quality Industrial<br>Storage Solutions</h1>
+                    <p data-i18n="hero-desc">We are India's leading manufacturer, supplier, and exporter of highly customized, heavy-duty racks and intelligent warehouse storage systems.</p>
+                    <div class="hero-buttons">
+                        <button onclick="navigateTo('page-products')" class="btn btn-hero-dark magnetic-btn" data-i18n="btn-explore">Explore Catalogue</button>
+                        <button onclick="document.getElementById('configurator').scrollIntoView({behavior:'smooth'})" class="btn btn-hero-light magnetic-btn"><i class="fa-solid fa-cube"></i> <span data-i18n="btn-3d">Build in 3D</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3D Configurator -->
+            <div class="section configurator-section" id="configurator">
+                <div class="container gsap-up">
+                    <div class="config-wrapper">
+                        <div class="config-controls">
+                            <h3 data-i18n="config-title">Specifications</h3>
+                            <div class="slider-group">
+                                <div class="labels">
+                                    <label data-i18n="config-h">Height</label> 
+                                    <div style="display:flex; align-items:center;">
+                                        <input type="number" id="input-height" class="sync-input" min="100" max="1000" value="200">
+                                        <span style="font-weight:600; color:var(--text-main);">cm</span>
+                                    </div>
+                                </div>
+                                <input type="range" id="slider-height" min="100" max="1000" value="200" step="10">
+                            </div>
+                            <div class="slider-group">
+                                <div class="labels">
+                                    <label data-i18n="config-w">Width</label> 
+                                    <div style="display:flex; align-items:center;">
+                                        <input type="number" id="input-width" class="sync-input" min="100" max="1000" value="250">
+                                        <span style="font-weight:600; color:var(--text-main);">cm</span>
+                                    </div>
+                                </div>
+                                <input type="range" id="slider-width" min="100" max="1000" value="250" step="10">
+                            </div>
+                            <div class="slider-group" style="margin-bottom: 30px;">
+                                <div class="labels">
+                                    <label data-i18n="config-l">Shelf Levels</label> 
+                                    <div style="display:flex; align-items:center;">
+                                        <input type="number" id="input-levels" class="sync-input" min="2" max="12" value="4">
+                                    </div>
+                                </div>
+                                <input type="range" id="slider-levels" min="2" max="12" value="4" step="1">
+                            </div>
+                            <div style="margin-top: auto;">
+                                <button onclick="copyToPopup()" class="btn-quote-config magnetic-btn"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="config-btn">Request Quote for this Setup</span></button>
+                            </div>
+                        </div>
+                        <div class="canvas-container" id="canvas-container">
+                            <div class="canvas-hint"><i class="fa-solid fa-hand-pointer"></i> <span data-i18n="config-hint">Drag to Rotate Premium Model</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Notch Stats Animation (Re-triggerable on navigation) -->
+            <div class="container">
+                <div class="stats-row" id="home-stats">
+                    <div class="stat-box">
+                        <h3><span class="animated-counter" data-target="15">0</span>+</h3>
+                        <p data-i18n="stat-exp">Years Experience</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3><span class="animated-counter" data-target="500">0</span>+</h3>
+                        <p data-i18n="stat-proj">Projects Completed</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3><span class="animated-counter" data-target="50">0</span>K+</h3>
+                        <p data-i18n="stat-tons">Tons of Steel Forged</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3><span class="animated-counter" data-target="100">0</span>%</h3>
+                        <p data-i18n="stat-qual">Quality Guarantee</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Why Choose Us -->
+            <div class="section section-light">
+                <div class="container gsap-up">
+                    <div style="text-align: center; max-width: 800px; margin: 0 auto 50px auto;">
+                        <span style="color: var(--primary-light); font-weight: 800; text-transform: uppercase; letter-spacing: 2px;" data-i18n="adv-sup">The Rashmi Advantage</span>
+                        <h2 data-i18n="adv-title">Why Industry Leaders Choose Us</h2>
+                        <p style="color: var(--text-muted); font-size: 18px;" data-i18n="adv-desc">We integrate state-of-the-art structural engineering with highly resilient materials to deliver systems that scale alongside your growing business operations.</p>
+                    </div>
+
+                    <div class="feature-grid">
+                        <div class="feature-box">
+                            <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                            <h3 data-i18n="adv-box1-h">Uncompromising Safety</h3>
+                            <p data-i18n="adv-box1-p">Every structural beam and connector is heavily stress-tested. Our designs comply strictly with international warehouse safety and load-bearing ISO guidelines.</p>
+                        </div>
+                        <div class="feature-box">
+                            <div class="feature-icon"><i class="fa-solid fa-compass-drafting"></i></div>
+                            <h3 data-i18n="adv-box2-h">Bespoke Engineering</h3>
+                            <p data-i18n="adv-box2-p">No two warehouses are alike. Our CAD engineers map your exact floor plan to manufacture highly customized racks that maximize every cubic meter.</p>
+                        </div>
+                        <div class="feature-box">
+                            <div class="feature-icon"><i class="fa-solid fa-truck-fast"></i></div>
+                            <h3 data-i18n="adv-box3-h">Pan-India Execution</h3>
+                            <p data-i18n="adv-box3-p">From initial design consultation in Pune to final structural installation anywhere in India, our dedicated logistics and engineering teams handle it all.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PREMIUM TESTIMONIALS (NEW) -->
+            <div class="section">
+                <div class="container gsap-up">
+                    <div style="text-align: center; margin-bottom: 50px;">
+                        <span style="color: var(--primary-light); font-weight: 800; text-transform: uppercase; letter-spacing: 2px;" data-i18n="testi-sup">Client Success</span>
+                        <h2 data-i18n="testi-title">Trusted by the Best</h2>
+                    </div>
+                    
+                    <div class="testimonial-grid">
+                        <div class="testimonial-card">
+                            <div>
+                                <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                                <p class="review-text" data-i18n="testi-1">"Rashmi Enterprises completely transformed our fulfillment center. The heavy-duty pallet racks were installed flawlessly and handled our extreme loads perfectly."</p>
+                            </div>
+                            <div class="client-info">
+                                <div class="client-avatar">R</div>
+                                <div class="client-details">
+                                    <h5>Rahul Sharma</h5>
+                                    <span data-i18n="testi-1-role">Logistics Director</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card">
+                            <div>
+                                <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                                <p class="review-text" data-i18n="testi-2">"The custom mezzanine floor doubled our operational space without needing to lease a new building. Incredible structural integrity and professional team."</p>
+                            </div>
+                            <div class="client-info">
+                                <div class="client-avatar">A</div>
+                                <div class="client-details">
+                                    <h5>Amit Patel</h5>
+                                    <span data-i18n="testi-2-role">Operations Manager</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card">
+                            <div>
+                                <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></div>
+                                <p class="review-text" data-i18n="testi-3">"We ordered 50 mobile compactors for our pharmaceutical archives. The space-saving is phenomenal and the rail movement is buttery smooth."</p>
+                            </div>
+                            <div class="client-info">
+                                <div class="client-avatar">S</div>
+                                <div class="client-details">
+                                    <h5>Sneha Gupta</h5>
+                                    <span data-i18n="testi-3-role">Facility Head</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comprehensive FAQ Section -->
+            <div class="faq-section section section-light">
+                <div class="container gsap-up">
+                    <div style="text-align: center; margin-bottom: 50px;">
+                        <h2 data-i18n="faq-title">Frequently Asked Questions</h2>
+                        <p data-i18n="faq-desc" style="color: var(--text-muted);">Everything you need to know about our industrial storage solutions.</p>
+                    </div>
+
+                    <div class="faq-container">
+                        <!-- FAQs 1-5 -->
+                        <div class="faq-item"><div class="faq-question"><span data-i18n="faq-q1">1. Do you manufacture custom rack dimensions?</span> <i class="fa-solid fa-chevron-down faq-icon"></i></div><div class="faq-answer" data-i18n="faq-a1">Absolutely. We specialize in bespoke storage solutions. We map your facility and manufacture racks customized exactly to your height, width, and load-bearing requirements.</div></div>
+                        <div class="faq-item"><div class="faq-question"><span data-i18n="faq-q2">2. What is the load capacity of Heavy Duty Racks?</span> <i class="fa-solid fa-chevron-down faq-icon"></i></div><div class="faq-answer" data-i18n="faq-a2">Our Heavy Duty Pallet Racks support anywhere from 1,000 KG to 4,000 KG per level (UDL), depending on the gauge of steel and the specific beam profile used.</div></div>
+                        <div class="faq-item"><div class="faq-question"><span data-i18n="faq-q3">3. Do you provide installation services pan-India?</span> <i class="fa-solid fa-chevron-down faq-icon"></i></div><div class="faq-answer" data-i18n="faq-a3">Yes, we have a highly trained team of installation engineers who travel pan-India to ensure your racking systems are assembled safely and securely.</div></div>
+                        <div class="faq-item"><div class="faq-question"><span data-i18n="faq-q4">4. What materials are used for manufacturing?</span> <i class="fa-solid fa-chevron-down faq-icon"></i></div><div class="faq-answer" data-i18n="faq-a4">We strictly use high-tensile, cold-rolled MS steel treated with an anti-corrosive powder coating finish for extreme durability and rust resistance.</div></div>
+                        <div class="faq-item"><div class="faq-question"><span data-i18n="faq-q5">5. How long does manufacturing and delivery take?</span> <i class="fa-solid fa-chevron-down faq-icon"></i></div><div class="faq-answer" data-i18n="faq-a5">Standard orders are typically manufactured and dispatched within 10-15 business days, while custom mega-structures may take up to 4 weeks.</div></div>
+                        
+                        <!-- FAQs 6-10 -->
+                        <div class="faq-item"><div class="faq-question"><span data-i18n="faq-q6">6. Is powder coating standard on all racks?</span> <i class="fa-solid fa-chevron-down faq-icon"></i></div><div class="faq-answer" data-i18n="faq-a6">Yes, every rack undergoes a multi-stage chemical cleaning process followed by automated epoxy powder coating to ensure longevity.</div></div>
+                        <div class="faq-item"><div class="faq-question"><span data-i18n="faq-q7">7. Can I reconfigure the slotted angle racks later?</span> <i class="fa-solid fa-chevron-down faq-icon"></i></div><div class="faq-answer" data-i18n="faq-a7">Yes! Our slotted angle racks use a modular nut-and-bolt assembly, meaning you can easily adjust shelf heights as your inventory changes.</div></div>
+                        <div class="faq-item"><div class="faq-question"><span data-i18n="faq-q8">8. What is the warranty on your storage systems?</span> <i class="fa-solid fa-chevron-down faq-icon"></i></div><div class="faq-answer" data-i18n="faq-a8">We provide a comprehensive 5-year structural warranty against manufacturing defects under normal operational loads.</div></div>
+                        <div class="faq-item"><div class="faq-question"><span data-i18n="faq-q9">9. Do you assist with warehouse layout planning?</span> <i class="fa-solid fa-chevron-down faq-icon"></i></div><div class="faq-answer" data-i18n="faq-a9">Yes, our CAD engineers can map your exact floor plan and provide 2D/3D visual blueprints before any manufacturing begins.</div></div>
+                        <div class="faq-item"><div class="faq-question"><span data-i18n="faq-q10">10. What is a Mobile Compactor and how does it save space?</span> <i class="fa-solid fa-chevron-down faq-icon"></i></div><div class="faq-answer" data-i18n="faq-a10">It is a high-density racking system that moves on floor rails. By eliminating permanent aisles, it can increase your storage capacity by up to 50%.</div></div>
+
+                        <!-- FAQs 11-15 -->
+                        <div class="faq-item"><div class="faq-question"><span data-i18n="faq-q11">11. Can cantilever racks be used outdoors?</span> <i class="fa-solid fa-chevron-down faq-icon"></i></div><div class="faq-answer" data-i18n="faq-a11">Yes, if requested, we can apply a specialized hot-dip galvanized finish to our cantilever racks, making them completely weatherproof for outdoor lumber or pipe storage.</div></div>
+                        <div class="faq-item"><div class="faq-question"><span data-i18n="faq-q12">12. Are your mezzanine floors easily dismantlable?</span> <i class="fa-solid fa-chevron-down faq-icon"></i></div><div class="faq-answer" data-i18n="faq-a12">Yes. Unlike welded structures, our Mezzanine floors are completely modular and bolted, meaning you can dismantle and relocate them if your facility moves.</div></div>
+                        <div class="faq-item"><div class="faq-question"><span data-i18n="faq-q13">13. How do you handle shipping to remote industrial locations?</span> <i class="fa-solid fa-chevron-down faq-icon"></i></div><div class="faq-answer" data-i18n="faq-a13">We partner with robust heavy-freight logistics networks to ensure our steel components reach even the most remote industrial zones in India securely.</div></div>
+                        <div class="faq-item"><div class="faq-question"><span data-i18n="faq-q14">14. Do you provide load testing and safety certificates?</span> <i class="fa-solid fa-chevron-down faq-icon"></i></div><div class="faq-answer" data-i18n="faq-a14">Absolutely. We are ISO 9001:2015 certified and can provide load-bearing safety certificates verified by structural engineers for your compliance audits.</div></div>
+                        <div class="faq-item"><div class="faq-question"><span data-i18n="faq-q15">15. What routine maintenance is required?</span> <i class="fa-solid fa-chevron-down faq-icon"></i></div><div class="faq-answer" data-i18n="faq-a15">Minimal maintenance is needed. We recommend an annual visual inspection of base plates, anchor bolts, and beam safety pins to ensure forklift impacts haven't compromised the structure.</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="container">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
+                        <div>
+                            <span style="color: var(--primary-light); font-weight: 800; text-transform: uppercase; letter-spacing: 2px;" data-i18n="home-top">Top Sellers</span>
+                            <h2 style="margin-bottom: 0;" data-i18n="home-feat">Featured Racks</h2>
+                        </div>
+                        <button onclick="navigateTo('page-products')" class="btn btn-outline magnetic-btn"><span data-i18n="btn-view-all">View All</span> <i class="fa-solid fa-arrow-right" style="margin-left:5px;"></i></button>
+                    </div>
+                    <div class="product-grid" id="featured-products-grid"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABOUT US -->
+        <section id="page-about" class="page-view">
+            <div class="page-header">
+                <div class="container">
+                    <h1 data-i18n="nav-company">About Rashmi Enterprises</h1>
+                    <p data-i18n="about-sub">Architecting robust, scalable, and highly intelligent storage environments for India's leading industrial sectors since 2010.</p>
+                </div>
+            </div>
+
+            <div class="container section" style="padding-top: 20px;">
+                <div class="about-grid" style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 60px; align-items: center; margin-bottom: 60px;">
+                    <div class="gsap-up">
+                        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Factory Overview" style="border-radius: 12px; box-shadow: 0 30px 60px rgba(0,0,0,0.15); width: 100%; height: 500px; object-fit: cover;">
+                    </div>
+                    <div class="about-text gsap-up" style="transition-delay: 0.2s;">
+                        <span style="color: var(--primary-light); font-weight: 800; text-transform: uppercase; letter-spacing: 2px;">Our Legacy</span>
+                        <h2 style="line-height: 1.2; margin-top: 10px;">Pioneers in Industrial Storage Manufacturing</h2>
+                        <p>Founded with a distinct vision to revolutionize warehouse efficiency, Rashmi Enterprises has grown into a powerhouse of industrial manufacturing. We believe that we don't just build steel racks; we architect space. By combining highly advanced CAD engineering with premium-grade steel fabrication, we deliver storage solutions that confidently withstand the test of time and extreme industrial loads.</p>
+                        <p>Our ISO 9001:2015 certified manufacturing facility, based in Pune, spans across acres of production space. It is equipped with the latest CNC roll-forming technology, automated multi-stage powder coating plants, and robotic welding stations. Every structural upright and horizontal beam we produce undergoes rigorous stress testing to ensure absolute zero-compromise safety for your workforce and valuable inventory.</p>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px;">
+                            <div style="background: var(--bg-section); padding: 25px; border-radius: 12px; border-left: 4px solid var(--primary-light); border-right: 1px solid var(--border-color); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+                                <h4 style="font-size: 20px; margin-bottom: 10px;"><i class="fa-solid fa-bullseye" style="color:var(--primary-light);"></i> Our Mission</h4>
+                                <p style="font-size: 15px; margin:0;">To continuously innovate and manufacture world-class storage solutions that optimize space, improve safety, and enhance operational workflows.</p>
+                            </div>
+                            <div style="background: var(--bg-section); padding: 25px; border-radius: 12px; border-left: 4px solid var(--primary); border-right: 1px solid var(--border-color); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+                                <h4 style="font-size: 20px; margin-bottom: 10px;"><i class="fa-solid fa-eye" style="color:var(--primary);"></i> Our Vision</h4>
+                                <p style="font-size: 15px; margin:0;">To be recognized universally as India's most reliable and technologically advanced partner in industrial racking and material handling.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Repeated Stats Animation Block for About Page -->
+                <div class="stats-row" id="about-stats">
+                    <div class="stat-box">
+                        <h3><span class="animated-counter" data-target="15">0</span>+</h3>
+                        <p data-i18n="stat-exp">Years Experience</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3><span class="animated-counter" data-target="500">0</span>+</h3>
+                        <p data-i18n="stat-proj">Projects Completed</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3><span class="animated-counter" data-target="50">0</span>K+</h3>
+                        <p data-i18n="stat-tons">Tons of Steel Forged</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3><span class="animated-counter" data-target="100">0</span>%</h3>
+                        <p data-i18n="stat-qual">Quality Guarantee</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRODUCTS DIRECTORY -->
+        <section id="page-products" class="page-view">
+            <div class="page-header" style="background: var(--primary);">
+                <div class="container">
+                    <h1 data-i18n="nav-products">Our Complete Catalogue</h1>
+                    <p data-i18n="prod-header-sub">Browse our extensive, AI-engineered range of industrial, commercial, and retail storage systems.</p>
+                </div>
+            </div>
+
+            <div class="container section" style="padding-top: 20px;">
+                <div style="display: flex; gap: 15px; margin-bottom: 50px; flex-wrap: wrap;" id="category-filters">
+                    <button class="btn btn-primary magnetic-btn" onclick="renderAllProducts('All')"><span data-i18n="cat-all">All Products</span></button>
+                    <button class="btn btn-outline magnetic-btn" onclick="renderAllProducts('Heavy Duty')"><span data-i18n="cat-heavy">Heavy Duty</span></button>
+                    <button class="btn btn-outline magnetic-btn" onclick="renderAllProducts('Storage Systems')"><span data-i18n="cat-storage">Storage Systems</span></button>
+                    <button class="btn btn-outline magnetic-btn" onclick="renderAllProducts('Mezzanine Floor')"><span data-i18n="cat-mezz">Mezzanine Floors</span></button>
+                    <button class="btn btn-outline magnetic-btn" onclick="renderAllProducts('Staff Lockers')"><span data-i18n="cat-lockers">Staff Lockers</span></button>
+                    <button class="btn btn-outline magnetic-btn" onclick="renderAllProducts('Tool Trolley')"><span data-i18n="cat-tool">Tool Trolleys</span></button>
+                    <button class="btn btn-outline magnetic-btn" onclick="renderAllProducts('Work Station')"><span data-i18n="cat-work">Work Stations</span></button>
+                    <button class="btn btn-outline magnetic-btn" onclick="renderAllProducts('Assembly Table')"><span data-i18n="cat-assemble">Assembly Tables</span></button>
+                </div>
+
+                <h3 id="products-result-title" style="margin-bottom: 20px;">Showing All Products</h3>
+                <div class="product-grid" id="full-products-grid"></div>
+            </div>
+        </section>
+
+        <!-- SINGLE PRODUCT VIEW (WhatsApp Direct Implementation) -->
+        <section id="page-single-product" class="page-view">
+            <div class="container section">
+                <button onclick="navigateTo('page-products')" class="btn btn-outline magnetic-btn" style="margin-bottom: 50px;"><i class="fa-solid fa-arrow-left"></i> Back to Products</button>
+                
+                <div id="single-product-container"></div>
+
+                <div class="related-products" style="border-top: 1px solid var(--border-color); padding-top: 60px; margin-top: 60px;">
+                    <h2 data-i18n="similar-prod">Similar Products You May Like</h2>
+                    <div class="product-grid" id="related-products-grid"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BLOG -->
+        <section id="page-blog" class="page-view">
+            <div class="page-header" style="background: #1a4f2c;">
+                <div class="container">
+                    <h1 data-i18n="nav-blogs">Industry Insights</h1>
+                    <p>News, tips, and AI-driven guides on warehouse optimization and safety management.</p>
+                </div>
+            </div>
+
+            <div class="container section" style="padding-top: 20px;">
+                <div class="blog-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px;">
+                    <div class="blog-card gsap-up" style="background: var(--bg-card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); transition: transform 0.3s;">
+                        <img src="https://images.unsplash.com/photo-1553413077-190dd305871c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Blog Image" style="width: 100%; height: 220px; object-fit: cover;">
+                        <div class="blog-content" style="padding: 30px;">
+                            <span class="blog-date" style="color: var(--primary-light); font-size: 13px; font-weight: 700; margin-bottom: 10px; display: block; text-transform: uppercase;">Feb 15, 2026</span>
+                            <h3 style="font-size: 20px; margin-bottom: 15px; color: var(--text-main);">Maximizing Vertical Space in Small Warehouses</h3>
+                            <p style="color: var(--text-muted); font-size: 15px;">Running out of floor space? Discover how structural mezzanine floors and multi-tier slotted angle racks can double or triple your storage capacity without expanding your physical footprint.</p>
+                        </div>
+                    </div>
+                    <div class="blog-card gsap-up" style="transition-delay: 0.1s; background: var(--bg-card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); transition: transform 0.3s;">
+                        <img src="https://images.unsplash.com/photo-1604719312566-8912e9227c6a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Blog Image" style="width: 100%; height: 220px; object-fit: cover;">
+                        <div class="blog-content" style="padding: 30px;">
+                            <span class="blog-date" style="color: var(--primary-light); font-size: 13px; font-weight: 700; margin-bottom: 10px; display: block; text-transform: uppercase;">Jan 28, 2026</span>
+                            <h3 style="font-size: 20px; margin-bottom: 15px; color: var(--text-main);">Heavy Duty Racks: Pallet vs. Cantilever</h3>
+                            <p style="color: var(--text-muted); font-size: 15px;">Not sure which racking system suits your industrial goods? We break down the structural differences between standard pallet racking and cantilever systems for long, heavy extrusions.</p>
+                        </div>
+                    </div>
+                    <div class="blog-card gsap-up" style="transition-delay: 0.2s; background: var(--bg-card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); transition: transform 0.3s;">
+                        <img src="https://images.unsplash.com/photo-1587293852726-694364abdf47?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Blog Image" style="width: 100%; height: 220px; object-fit: cover;">
+                        <div class="blog-content" style="padding: 30px;">
+                            <span class="blog-date" style="color: var(--primary-light); font-size: 13px; font-weight: 700; margin-bottom: 10px; display: block; text-transform: uppercase;">Dec 10, 2025</span>
+                            <h3 style="font-size: 20px; margin-bottom: 15px; color: var(--text-main);">The Ultimate Guide to Warehouse Safety Checks</h3>
+                            <p style="color: var(--text-muted); font-size: 15px;">A collapsed rack can be catastrophic. Learn the 5 essential maintenance checks every facility manager must perform monthly to ensure structural integrity and ISO compliance.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- NEW POWER MOVE CTA SECTION -->
+    <div class="pre-footer-cta">
+        <div class="container pre-footer-cta-inner">
+            <div>
+                <h2 data-i18n="cta-title">Ready to Optimize Your Warehouse Space?</h2>
+                <p data-i18n="cta-desc">Get a free 3D CAD layout and custom quotation for your facility today.</p>
+            </div>
+            <div>
+                <button onclick="openPopup()" class="btn btn-whatsapp-direct magnetic-btn" style="background: white; color: var(--primary);"><i class="fa-solid fa-headset"></i> <span data-i18n="cta-btn">Talk to an Expert</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TRUST BADGES / CLIENT LOGOS (Modern Infinite Marquee) -->
+    <div class="client-logos-section">
+        <div class="container" style="max-width: 1400px;">
+            <h4 data-i18n="trust-badge" style="text-align: center; color: var(--text-muted); margin-bottom: 40px; font-size: 15px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase;">Trusted by India's Leading Supply Chains</h4>
+            <div class="marquee-wrapper">
+                <div class="marquee-content">
+                    <i class="fa-brands fa-amazon" title="Amazon"></i>
+                    <i class="fa-solid fa-truck-fast" title="Logistics Partners"></i>
+                    <i class="fa-solid fa-industry" title="Manufacturing Units"></i>
+                    <i class="fa-brands fa-dhl" title="DHL"></i>
+                    <i class="fa-solid fa-building-shield" title="Enterprise Clients"></i>
+                    <i class="fa-solid fa-warehouse" title="Mega Warehouses"></i>
+                    <i class="fa-brands fa-docker" title="Shipping Ports"></i>
+                    <i class="fa-solid fa-box-open" title="Distribution Centers"></i>
+                </div>
+                <!-- Duplicate for seamless loop -->
+                <div class="marquee-content">
+                    <i class="fa-brands fa-amazon" title="Amazon"></i>
+                    <i class="fa-solid fa-truck-fast" title="Logistics Partners"></i>
+                    <i class="fa-solid fa-industry" title="Manufacturing Units"></i>
+                    <i class="fa-brands fa-dhl" title="DHL"></i>
+                    <i class="fa-solid fa-building-shield" title="Enterprise Clients"></i>
+                    <i class="fa-solid fa-warehouse" title="Mega Warehouses"></i>
+                    <i class="fa-brands fa-docker" title="Shipping Ports"></i>
+                    <i class="fa-solid fa-box-open" title="Distribution Centers"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OVERHAULED PRO FOOTER -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <!-- Col 1: Brand & Bio -->
+                <div class="footer-col" style="padding-right: 20px;">
+                    <h4 data-i18n="nav-company">About Us</h4>
+                    <div class="footer-logo">
+                        <div class="logo-mark"></div>
+                        <div class="logo-text">Rashmi<br><span>Enterprises</span></div>
+                    </div>
+                    <p data-i18n="footer-bio" style="margin-top:10px; line-height: 1.6;">India's Premier Manufacturer & Exporter of Heavy-Duty Industrial Racking & Intelligent Storage Systems since 2010.</p>
+                    <img src="https://images.unsplash.com/photo-1565439387814-118d098e94a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="High-Tech Manufacturing Facility" class="footer-factory-img" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+                </div>
+
+                <!-- Col 2: Links -->
+                <div class="footer-col">
+                    <h4 data-i18n="ft-links">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a onclick="navigateTo('page-home');"><i class="fa-solid fa-chevron-right"></i> <span data-i18n="nav-home">Home Page</span></a></li>
+                        <li><a onclick="navigateTo('page-about');"><i class="fa-solid fa-chevron-right"></i> <span data-i18n="nav-company">About Us</span></a></li>
+                        <li><a onclick="navigateTo('page-products');"><i class="fa-solid fa-chevron-right"></i> <span data-i18n="nav-products">Products Directory</span></a></li>
+                        <li><a onclick="openPopup();"><i class="fa-solid fa-chevron-right"></i> <span data-i18n="ft-req">Request Custom Quote</span></a></li>
+                        <li><a onclick="navigateTo('page-blog');"><i class="fa-solid fa-chevron-right"></i> <span data-i18n="nav-blogs">Industry Blog</span></a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Visual Products -->
+                <div class="footer-col">
+                    <h4 data-i18n="ft-prod">Top Products</h4>
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <a href="#" onclick="viewProduct('heavy-duty'); return false;" class="footer-product-link">
+                            <img src="https://images.unsplash.com/photo-1604719312566-8912e9227c6a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="footer-product-img">
+                            <div class="footer-product-info">
+                                <h5 data-i18n="prod-pallet">Heavy Duty Pallet Racks</h5>
+                                <p>1000 - 4000 KG UDL</p>
+                            </div>
+                        </a>
+                        <a href="#" onclick="viewProduct('slotted-angle'); return false;" class="footer-product-link">
+                            <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="footer-product-img">
+                            <div class="footer-product-info">
+                                <h5 data-i18n="prod-slotted">Slotted Angle Racks</h5>
+                                <p>100 - 300 KG Level</p>
+                            </div>
+                        </a>
+                        <a href="#" onclick="viewProduct('mobile-compactor'); return false;" class="footer-product-link">
+                            <img src="https://images.unsplash.com/photo-1587293852726-694364abdf47?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="footer-product-img">
+                            <div class="footer-product-info">
+                                <h5 data-i18n="prod-compactor">Mobile Compactor</h5>
+                                <p>High Density Storage</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Col 4: Contact & Maps -->
+                <div class="footer-col">
+                    <h4 data-i18n="nav-contact">Contact Us</h4>
+                    <ul class="footer-links footer-contact" style="margin-bottom:0;">
+                        <li><i class="fa-solid fa-location-dot"></i><span>Survey No.-12, Opp. Lagad Transport,<br>Nanded Phata, Pune-411041</span></li>
+                        <li><i class="fa-solid fa-phone"></i><span>+91 9370658141<br>+91 8237 186150</span></li>
+                        <li><i class="fa-solid fa-envelope"></i><span>sales@rashmiracks.com</span></li>
+                    </ul>
+                    <iframe class="google-map-embed" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3784.580459564887!2d73.8164010148918!3d18.457223875924765!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2953047a74079%3A0xc47e3350257e84de!2sNanded%20Phata%2C%20Pune%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1676901844520!5m2!1sen!2sin" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div>&copy; 2026 Rashmi Enterprises. All Rights Reserved. Engineered for Industrial Excellence.</div>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Sitemap</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Actions -->
+    <div class="floating-actions">
+        <a href="https://wa.me/919370658141" target="_blank" class="float-btn float-wa magnetic-btn" title="WhatsApp Us"><i class="fa-brands fa-whatsapp"></i></a>
+        <a href="mailto:sales@rashmiracks.com" class="float-btn float-mail magnetic-btn" title="Email Us"><i class="fa-solid fa-envelope"></i></a>
+    </div>
+
+    <!-- ADVANCED SPLIT POPUP -->
+    <div class="popup-overlay" id="enquiry-popup">
+        <div class="popup-content">
+            <button class="popup-close" onclick="closePopup()"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="popup-left">
+                <span class="popup-subtitle" data-i18n="pop-sub">Request A Quote</span>
+                <h2 class="popup-title">Need A Free Quote?<br><span>Let's Talk.</span></h2>
+                
+                <ul class="popup-info-list">
+                    <li><div class="popup-info-icon"><i class="fa-solid fa-reply"></i></div> Reply within 24 hours </li>
+                    <li><div class="popup-info-icon"><i class="fa-solid fa-headset"></i></div> 24 hrs telephone support </li>
+                    <li style="align-items: center;">
+                        <div class="popup-info-icon"><i class="fa-solid fa-phone"></i></div>
+                        <div style="display: flex; flex-direction: column; line-height: 1.3;">
+                            <span>+91 9370658141</span>
+                            <span>+91 8237 186150</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="popup-right">
+                <div class="quote-input-group">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" id="wa-name" placeholder="Your Name">
+                </div>
+                
+                <div class="quote-input-group">
+                    <i class="fa-solid fa-phone"></i>
+                    <input type="tel" id="wa-phone" placeholder="Your Contact Number">
+                </div>
+                
+                <div class="quote-input-group">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" id="wa-email" placeholder="Your Email">
+                </div>
+                
+                <div class="quote-input-group">
+                    <i class="fa-solid fa-briefcase"></i>
+                    <select id="wa-service">
+                        <option value="General Enquiry">Select A Service</option>
+                        <option value="Heavy Duty Racks">Heavy Duty Racks</option>
+                        <option value="Storage Systems">Storage Systems</option>
+                        <option value="Mezzanine Floor">Mezzanine Floor</option>
+                        <option value="Staff Lockers">Staff Lockers</option>
+                        <option value="Custom 3D Setup">Custom 3D Rack Setup</option>
+                    </select>
+                </div>
+                
+                <div class="quote-input-group">
+                    <i class="fa-solid fa-pen" style="top: 18px;"></i>
+                    <textarea id="wa-specs" rows="4" placeholder="Type your message here or detailed specs..."></textarea>
+                </div>
+
+                <button onclick="sendToWhatsApp()" class="quote-submit-btn magnetic-btn">
+                    Get My Free Quote <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         SCRIPTS 
+         ========================================== -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.34/dist/lenis.min.js"></script>
+
+    <script>
+        let currentLang = 'en';
+
+        /* -------------------------------------------
+           TRANSLATION ENGINE (EN/HI)
+        ------------------------------------------- */
+        const i18n = {
+            en: {
+                "nav-home": "HOME", "nav-company": "COMPANY", "nav-products": "PRODUCTS", "nav-blogs": "BLOGS", "nav-contact": "Contact",
+                "cat-all": "All Products", "cat-heavy": "Heavy Duty Racks", "cat-storage": "Storage Systems", "cat-mezz": "Mezzanine Floors", "cat-lockers": "Staff Lockers", "cat-tool": "Tool Trolleys", "cat-work": "Work Stations", "cat-assemble": "Assembly Tables",
+                "prod-pallet": "Pallet Racks", "prod-cantilever": "Cantilever Racks", "prod-drive": "Drive-In Racks", "prod-heavy-shelf": "Heavy Duty Shelving",
+                "prod-slotted": "Slotted Angle Racks", "prod-compactor": "Mobile Compactor", "prod-pigeon": "Pigeon Hole", "prod-multi": "Multi Tier Racks",
+                "prod-lock6": "6 Door Locker", "prod-lock12": "12 Door Locker", "prod-lockcus": "Custom Locker",
+                "btn-view-all": "View All Catalogue",
+                "hero-title": "Premium Quality Industrial<br>Storage Solutions",
+                "hero-desc": "We are India's leading manufacturer, supplier, and exporter of highly customized, heavy-duty racks and intelligent warehouse storage systems.",
+                "btn-explore": "Explore Catalogue", "btn-3d": "Build in 3D",
+                "config-title": "Specifications", "config-h": "Height", "config-w": "Width", "config-l": "Shelf Levels", "config-btn": "Request Quote for this Setup", "config-hint": "Drag to Rotate Premium Model",
+                "stat-exp": "Years Experience", "stat-proj": "Projects Completed", "stat-tons": "Tons of Steel Forged", "stat-qual": "Quality Guarantee",
+                "adv-sup": "The Rashmi Advantage", "adv-title": "Why Industry Leaders Choose Us",
+                "adv-desc": "We integrate state-of-the-art structural engineering with highly resilient materials to deliver systems that scale alongside your growing business operations.",
+                "adv-box1-h": "Uncompromising Safety", "adv-box1-p": "Every structural beam and connector is heavily stress-tested. Our designs comply strictly with international warehouse safety and load-bearing ISO guidelines.",
+                "adv-box2-h": "Bespoke Engineering", "adv-box2-p": "No two warehouses are alike. Our CAD engineers map your exact floor plan to manufacture highly customized racks that maximize every cubic meter.",
+                "adv-box3-h": "Pan-India Execution", "adv-box3-p": "From initial design consultation in Pune to final structural installation anywhere in India, our dedicated logistics and engineering teams handle it all.",
+                "faq-title": "Frequently Asked Questions", "faq-desc": "Everything you need to know about our industrial storage solutions.",
+                "home-top": "Top Sellers", "home-feat": "Featured Racks",
+                "about-sub": "Architecting robust, scalable, and highly intelligent storage environments for India's leading industrial sectors since 2010.",
+                "prod-header-sub": "Browse our extensive, AI-engineered range of industrial, commercial, and retail storage systems.",
+                "similar-prod": "Similar Products You May Like",
+                "direct-wa": "Direct Order via WhatsApp",
+                "cta-title": "Ready to Optimize Your Warehouse Space?", "cta-desc": "Get a free 3D CAD layout and custom quotation for your facility today.", "cta-btn": "Talk to an Expert",
+                "trust-badge": "Trusted by India's Leading Supply Chains",
+                "footer-bio": "India's Premier Manufacturer & Exporter of Heavy-Duty Industrial Racking & Intelligent Storage Systems since 2010.",
+                "ft-links": "Quick Links", "ft-req": "Request Custom Quote", "ft-prod": "Top Products",
+                "pop-sub": "Request A Quote",
+                "testi-sup": "Client Success", "testi-title": "Trusted by the Best",
+                "testi-1": "\"Rashmi Enterprises completely transformed our fulfillment center. The heavy-duty pallet racks were installed flawlessly and handled our extreme loads perfectly.\"",
+                "testi-1-role": "Logistics Director",
+                "testi-2": "\"The custom mezzanine floor doubled our operational space without needing to lease a new building. Incredible structural integrity and professional team.\"",
+                "testi-2-role": "Operations Manager",
+                "testi-3": "\"We ordered 50 mobile compactors for our pharmaceutical archives. The space-saving is phenomenal and the rail movement is buttery smooth.\"",
+                "testi-3-role": "Facility Head",
+                "faq-q1": "1. Do you manufacture custom rack dimensions?", "faq-a1": "Absolutely. We specialize in bespoke storage solutions. We map your facility and manufacture racks customized exactly to your height, width, and load-bearing requirements.",
+                "faq-q2": "2. What is the load capacity of Heavy Duty Racks?", "faq-a2": "Our Heavy Duty Pallet Racks support anywhere from 1,000 KG to 4,000 KG per level (UDL), depending on the gauge of steel and the specific beam profile used.",
+                "faq-q3": "3. Do you provide installation services pan-India?", "faq-a3": "Yes, we have a highly trained team of installation engineers who travel pan-India to ensure your racking systems are assembled safely and securely.",
+                "faq-q4": "4. What materials are used for manufacturing?", "faq-a4": "We strictly use high-tensile, cold-rolled MS steel treated with an anti-corrosive powder coating finish for extreme durability and rust resistance.",
+                "faq-q5": "5. How long does manufacturing and delivery take?", "faq-a5": "Standard orders are typically manufactured and dispatched within 10-15 business days, while custom mega-structures may take up to 4 weeks.",
+                "faq-q6": "6. Is powder coating standard on all racks?", "faq-a6": "Yes, every rack undergoes a multi-stage chemical cleaning process followed by automated epoxy powder coating to ensure longevity.",
+                "faq-q7": "7. Can I reconfigure the slotted angle racks later?", "faq-a7": "Yes! Our slotted angle racks use a modular nut-and-bolt assembly, meaning you can easily adjust shelf heights as your inventory changes.",
+                "faq-q8": "8. What is the warranty on your storage systems?", "faq-a8": "We provide a comprehensive 5-year structural warranty against manufacturing defects under normal operational loads.",
+                "faq-q9": "9. Do you assist with warehouse layout planning?", "faq-a9": "Yes, our CAD engineers can map your exact floor plan and provide 2D/3D visual blueprints before any manufacturing begins.",
+                "faq-q10": "10. What is a Mobile Compactor and how does it save space?", "faq-a10": "It is a high-density racking system that moves on floor rails. By eliminating permanent aisles, it can increase your storage capacity by up to 50%.",
+                "faq-q11": "11. Can cantilever racks be used outdoors?", "faq-a11": "Yes, if requested, we can apply a specialized hot-dip galvanized finish to our cantilever racks, making them completely weatherproof for outdoor lumber or pipe storage.",
+                "faq-q12": "12. Are your mezzanine floors easily dismantlable?", "faq-a12": "Yes. Unlike welded structures, our Mezzanine floors are completely modular and bolted, meaning you can dismantle and relocate them if your facility moves.",
+                "faq-q13": "13. How do you handle shipping to remote industrial locations?", "faq-a13": "We partner with robust heavy-freight logistics networks to ensure our steel components reach even the most remote industrial zones in India securely.",
+                "faq-q14": "14. Do you provide load testing and safety certificates?", "faq-a14": "Absolutely. We are ISO 9001:2015 certified and can provide load-bearing safety certificates verified by structural engineers for your compliance audits.",
+                "faq-q15": "15. What routine maintenance is required?", "faq-a15": "Minimal maintenance is needed. We recommend an annual visual inspection of base plates, anchor bolts, and beam safety pins to ensure forklift impacts haven't compromised the structure."
+            },
+            hi: {
+                "nav-home": "होम", "nav-company": "कंपनी", "nav-products": "उत्पाद", "nav-blogs": "ब्लॉग", "nav-contact": "संपर्क करें",
+                "cat-all": "सभी उत्पाद", "cat-heavy": "हैवी ड्यूटी रैक", "cat-storage": "स्टोरेज सिस्टम", "cat-mezz": "मेज़ानाइन फ्लोर", "cat-lockers": "स्टाफ लॉकर", "cat-tool": "टूल ट्रॉली", "cat-work": "वर्क स्टेशन", "cat-assemble": "असेंबली टेबल",
+                "prod-pallet": "पैलेट रैक", "prod-cantilever": "कैंटिलीवर रैक", "prod-drive": "ड्राइव-इन रैक", "prod-heavy-shelf": "हैवी ड्यूटी शेल्विंग",
+                "prod-slotted": "स्लॉटेड एंगल रैक", "prod-compactor": "मोबाइल कॉम्पैक्टर", "prod-pigeon": "पिजन होल", "prod-multi": "मल्टी टियर रैक",
+                "prod-lock6": "6 डोर लॉकर", "prod-lock12": "12 डोर लॉकर", "prod-lockcus": "कस्टम लॉकर",
+                "btn-view-all": "सभी कैटलॉग देखें",
+                "hero-title": "प्रीमियम गुणवत्ता औद्योगिक<br>भंडारण समाधान",
+                "hero-desc": "हम भारत के अग्रणी निर्माता, आपूर्तिकर्ता और उच्च अनुकूलित, भारी-शुल्क रैक और बुद्धिमान गोदाम भंडारण प्रणालियों के निर्यातक हैं।",
+                "btn-explore": "कैटलॉग देखें", "btn-3d": "3D में बनाएं",
+                "config-title": "विशेष विवरण", "config-h": "ऊंचाई", "config-w": "चौड़ाई", "config-l": "शेल्फ स्तर", "config-btn": "इस सेटअप के लिए कोटेशन मांगें", "config-hint": "प्रीमियम मॉडल को घुमाने के लिए खींचें",
+                "stat-exp": "वर्षों का अनुभव", "stat-proj": "परियोजनाएं पूरी कीं", "stat-tons": "टन स्टील जाली", "stat-qual": "गुणवत्ता की गारंटी",
+                "adv-sup": "रश्मि का लाभ", "adv-title": "उद्योग के नेता हमें क्यों चुनते हैं",
+                "adv-desc": "हम आपके बढ़ते व्यवसाय संचालन के साथ स्केल करने वाले सिस्टम देने के लिए अत्यधिक लचीली सामग्री के साथ अत्याधुनिक संरचनात्मक इंजीनियरिंग को एकीकृत करते हैं।",
+                "adv-box1-h": "अटूट सुरक्षा", "adv-box1-p": "हर बीम का परीक्षण किया जाता है। हमारे डिजाइन अंतर्राष्ट्रीय गोदाम सुरक्षा और लोड-असर आईएसओ दिशानिर्देशों का सख्ती से पालन करते हैं।",
+                "adv-box2-h": "कस्टम इंजीनियरिंग", "adv-box2-p": "कोई भी दो गोदाम एक जैसे नहीं होते। हमारे इंजीनियर आपके सटीक फ्लोर प्लान को मैप करके अनुकूलित रैक बनाते हैं।",
+                "adv-box3-h": "पैन-इंडिया निष्पादन", "adv-box3-p": "पुणे में प्रारंभिक डिजाइन से लेकर भारत में कहीं भी अंतिम स्थापना तक, हमारी टीम सब कुछ संभालती है।",
+                "faq-title": "अक्सर पूछे जाने वाले प्रश्न", "faq-desc": "हमारे औद्योगिक भंडारण समाधानों के बारे में वह सब कुछ जो आपको जानना आवश्यक है।",
+                "home-top": "टॉप सेलर्स", "home-feat": "विशेष रैक",
+                "about-sub": "2010 से भारत के अग्रणी औद्योगिक क्षेत्रों के लिए मजबूत, और अत्यधिक बुद्धिमान भंडारण वातावरण तैयार करना।",
+                "prod-header-sub": "औद्योगिक, वाणिज्यिक और खुदरा भंडारण प्रणालियों की हमारी विस्तृत एआई-इंजीनियर्ड रेंज ब्राउज़ करें।",
+                "similar-prod": "समान उत्पाद जो आपको पसंद आ सकते हैं",
+                "direct-wa": "व्हाट्सएप के माध्यम से डायरेक्ट ऑर्डर",
+                "cta-title": "क्या आप अपने वेयरहाउस को अनुकूलित करने के लिए तैयार हैं?", "cta-desc": "आज ही अपनी सुविधा के लिए मुफ़्त 3D कैड लेआउट और कस्टम कोटेशन प्राप्त करें।", "cta-btn": "विशेषज्ञ से बात करें",
+                "trust-badge": "भारत की अग्रणी कंपनियों द्वारा विश्वसनीय",
+                "footer-bio": "2010 से हेवी-ड्यूटी औद्योगिक रैकिंग और इंटेलिजेंट स्टोरेज सिस्टम के भारत के प्रमुख निर्माता और निर्यातक।",
+                "ft-links": "त्वरित लिंक", "ft-req": "कस्टम कोटेशन का अनुरोध करें", "ft-prod": "शीर्ष उत्पाद",
+                "pop-sub": "कोटेशन का अनुरोध करें",
+                "testi-sup": "ग्राहक सफलता", "testi-title": "सर्वश्रेष्ठ द्वारा विश्वसनीय",
+                "testi-1": "\"रश्मि एंटरप्राइजेज ने हमारे फुलफिलमेंट सेंटर को पूरी तरह से बदल दिया। भारी-भरकम पैलेट रैक त्रुटिहीन रूप से स्थापित किए गए थे और हमारे अत्यधिक भार को पूरी तरह से संभाला।\"",
+                "testi-1-role": "लॉजिस्टिक्स निदेशक",
+                "testi-2": "\"कस्टम मेज़ानाइन फ्लोर ने एक नया भवन पट्टे पर लेने की आवश्यकता के बिना हमारे परिचालन स्थान को दोगुना कर दिया। अविश्वसनीय संरचनात्मक अखंडता और पेशेवर टीम।\"",
+                "testi-2-role": "संचालन प्रबंधक",
+                "testi-3": "\"हमने अपने फार्मास्युटिकल अभिलेखागार के लिए 50 मोबाइल कॉम्पैक्टर का आदेश दिया। स्थान की बचत अभूतपूर्व है और रेल की आवाजाही मक्खन जैसी चिकनी है।\"",
+                "testi-3-role": "सुविधा प्रमुख",
+                "faq-q1": "1. क्या आप कस्टम रैक आयाम बनाते हैं?", "faq-a1": "बिल्कुल। हम आपकी सुविधा को मैप करते हैं और आपकी ऊंचाई, चौड़ाई और लोड आवश्यकताओं के अनुसार रैक बनाते हैं।",
+                "faq-q2": "2. हैवी ड्यूटी रैक की भार क्षमता क्या है?", "faq-a2": "स्टील के गेज के आधार पर हमारे हैवी ड्यूटी पैलेट रैक 1,000 किलोग्राम से 4,000 किलोग्राम प्रति स्तर (UDL) तक का समर्थन करते हैं।",
+                "faq-q3": "3. क्या आप पूरे भारत में स्थापना सेवाएं प्रदान करते हैं?", "faq-a3": "हां, हमारे पास स्थापना इंजीनियरों की एक उच्च प्रशिक्षित टीम है जो सुरक्षित स्थापना सुनिश्चित करने के लिए पूरे भारत की यात्रा करती है।",
+                "faq-q4": "4. निर्माण के लिए किन सामग्रियों का उपयोग किया जाता है?", "faq-a4": "हम अत्यधिक स्थायित्व और जंग प्रतिरोध के लिए एंटी-संक्षारक पाउडर कोटिंग फिनिश के साथ उच्च-तन्यता, कोल्ड-रोल्ड एमएस स्टील का उपयोग करते हैं।",
+                "faq-q5": "5. निर्माण और वितरण में कितना समय लगता है?", "faq-a5": "मानक ऑर्डर आम तौर पर 10-15 व्यावसायिक दिनों के भीतर निर्मित और भेजे जाते हैं, जबकि कस्टम संरचनाओं में 4 सप्ताह तक का समय लग सकता है।",
+                "faq-q6": "6. क्या सभी रैक पर पाउडर कोटिंग मानक है?", "faq-a6": "हां, दीर्घायु सुनिश्चित करने के लिए प्रत्येक रैक को स्वचालित एपॉक्सी पाउडर कोटिंग के बाद एक बहु-चरण रासायनिक सफाई प्रक्रिया से गुजरना पड़ता है।",
+                "faq-q7": "7. क्या मैं बाद में स्लॉटेड एंगल रैक को फिर से कॉन्फ़िगर कर सकता हूं?", "faq-a7": "हाँ! हमारे स्लॉटेड एंगल रैक एक मॉड्यूलर नट-एंड-बोल्ट असेंबली का उपयोग करते हैं, जिसका अर्थ है कि आप आसानी से शेल्फ की ऊंचाई समायोजित कर सकते हैं।",
+                "faq-q8": "8. आपके भंडारण प्रणालियों पर वारंटी क्या है?", "faq-a8": "हम सामान्य परिचालन भार के तहत विनिर्माण दोषों के खिलाफ 5 साल की व्यापक संरचनात्मक वारंटी प्रदान करते हैं।",
+                "faq-q9": "9. क्या आप वेयरहाउस लेआउट योजना में सहायता करते हैं?", "faq-a9": "हां, हमारे सीएडी इंजीनियर आपके सटीक फ्लोर प्लान को मैप कर सकते हैं और निर्माण शुरू होने से पहले 2डी/3डी विज़ुअल ब्लूप्रिंट प्रदान कर सकते हैं।",
+                "faq-q10": "10. मोबाइल कॉम्पैक्टर क्या है और यह स्थान कैसे बचाता है?", "faq-a10": "यह एक उच्च घनत्व वाली रैकिंग प्रणाली है जो फर्श की पटरियों पर चलती है। स्थायी गलियारों को समाप्त करके, यह आपकी भंडारण क्षमता को 50% तक बढ़ा सकता है।",
+                "faq-q11": "11. क्या कैंटिलीवर रैक का उपयोग बाहर किया जा सकता है?", "faq-a11": "हां, यदि अनुरोध किया जाता है, तो हम अपने कैंटिलीवर रैक पर एक विशेष हॉट-डिप गैल्वनाइज्ड फिनिश लागू कर सकते हैं, जिससे वे बाहरी उपयोग के लिए मौसमरोधी हो जाते हैं।",
+                "faq-q12": "12. क्या आपके मेज़ानाइन फर्श आसानी से नष्ट करने योग्य हैं?", "faq-a12": "हाँ। वेल्डेड संरचनाओं के विपरीत, हमारे मेज़ानाइन फर्श पूरी तरह से मॉड्यूलर और बोल्ट वाले हैं, जिसका अर्थ है कि आप उन्हें स्थानांतरित कर सकते हैं।",
+                "faq-q13": "13. आप दूरस्थ औद्योगिक स्थानों पर शिपिंग कैसे संभालते हैं?", "faq-a13": "हम यह सुनिश्चित करने के लिए मजबूत रसद नेटवर्क के साथ साझेदारी करते हैं कि हमारे स्टील घटक भारत के सबसे दूरस्थ औद्योगिक क्षेत्रों में भी सुरक्षित रूप से पहुंचें।",
+                "faq-q14": "14. क्या आप लोड परीक्षण और सुरक्षा प्रमाण पत्र प्रदान करते हैं?", "faq-a14": "बिल्कुल। हम आईएसओ 9001:2015 प्रमाणित हैं और आपके अनुपालन ऑडिट के लिए संरचनात्मक इंजीनियरों द्वारा सत्यापित लोड-असर सुरक्षा प्रमाण पत्र प्रदान कर सकते हैं।",
+                "faq-q15": "15. क्या नियमित रखरखाव की आवश्यकता है?", "faq-a15": "न्यूनतम रखरखाव की आवश्यकता है। हम यह सुनिश्चित करने के लिए बेस प्लेट्स, एंकर बोल्ट और बीम सुरक्षा पिन के वार्षिक दृश्य निरीक्षण की सलाह देते हैं कि कोई क्षति न हो।"
+            }
+        };
+
+        /* -------------------------------------------
+           AI-GENERATED PRODUCT DATABASE (Bi-Lingual Support)
+        ------------------------------------------- */
+        const productsDB = [
+            {
+                id: 'heavy-duty', category: 'Heavy Duty', featured: true,
+                title: 'Heavy Duty Pallet Racking System', titleHi: 'हैवी ड्यूटी पैलेट रैक सिस्टम',
+                img: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                desc: 'Engineered for massive industrial loads, our Heavy Duty Pallet Racks act as the structural backbone for modern large-scale warehouses. Designed to allow seamless forklift access.',
+                descHi: 'विशाल औद्योगिक भार के लिए डिज़ाइन किया गया, हमारे हेवी ड्यूटी पैलेट रैक आधुनिक बड़े पैमाने के गोदामों के लिए संरचनात्मक रीढ़ के रूप में कार्य करते हैं।',
+                specs: { 'Load Capacity': '1000 - 4000 KG per level', 'Material Grade': 'High Tensile Cold Rolled Steel', 'Surface Finish': 'Anti-corrosive Powder Coated', 'Customization': 'Fully Custom Dimensions' }
+            },
+            {
+                id: 'cantilever', category: 'Heavy Duty', featured: false,
+                title: 'Industrial Cantilever Racks', titleHi: 'इंडस्ट्रियल कैंटिलीवर रैक',
+                img: 'https://images.unsplash.com/photo-1565610222536-ce127147bfa6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                desc: 'Designed specifically for the safe and organized storage of long, bulky, or awkwardly shaped industrial materials like timber boards, PVC pipes, steel extrusions.',
+                descHi: 'विशेष रूप से लकड़ी के बोर्ड, पीवीसी पाइप और स्टील एक्सट्रूज़न जैसी लंबी और भारी औद्योगिक सामग्रियों के सुरक्षित भंडारण के लिए डिज़ाइन किया गया।',
+                specs: { 'Ideal Storage For': 'Pipes, Timber, Steel Bars', 'Arm Load Capacity': 'Up to 1500 KG per arm', 'Configuration': 'Single or Double-Sided', 'Base Design': 'Heavy-duty structural base' }
+            },
+            {
+                id: 'drive-in', category: 'Heavy Duty', featured: false,
+                title: 'Drive-In & Drive-Through Racks', titleHi: 'ड्राइव-इन और ड्राइव-थ्रू रैक',
+                img: 'https://images.unsplash.com/photo-1578575437130-527eed3abbec?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                desc: 'The ultimate high-density storage solution for large quantities of homogenous products. Forklifts drive directly into the racking lanes to deposit and retrieve pallets.',
+                descHi: 'समान उत्पादों की बड़ी मात्रा के लिए अंतिम उच्च-घनत्व भंडारण समाधान। फोर्कलिफ्ट सीधे रैकिंग लेन में जाते हैं।',
+                specs: { 'Density': 'Up to 75% more pallets', 'Operation Type': 'LIFO or FIFO', 'Structure': 'Continuous structural rails', 'Best For': 'Cold storage, FMCG bulk goods' }
+            },
+            {
+                id: 'heavy-duty-shelving', category: 'Heavy Duty', featured: false,
+                title: 'Heavy Duty Shelving', titleHi: 'हैवी ड्यूटी शेल्विंग',
+                img: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                desc: 'Industrial-grade shelving designed for hand-loaded heavy items. Features robust uprights and reinforced steel shelves perfect for heavy automotive parts.',
+                descHi: 'हाथ से लोड किए गए भारी सामानों के लिए डिज़ाइन की गई औद्योगिक ग्रेड शेल्विंग। भारी ऑटोमोटिव पार्ट्स के लिए बिल्कुल सही।',
+                specs: { 'Load Capacity': '500 - 1000 KG per level', 'Material': 'Powder Coated Steel', 'Decking': 'Reinforced Steel Panels', 'Assembly': 'Boltless Clip System' }
+            },
+            {
+                id: 'slotted-angle', category: 'Storage Systems', featured: true,
+                title: 'Industrial Slotted Angle Racks', titleHi: 'इंडस्ट्रियल स्लॉटेड एंगल रैक',
+                img: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                desc: 'The most versatile, economical, and widely used storage solution globally. Perfect for organizing light to medium goods in storerooms and workshops.',
+                descHi: 'विश्व स्तर पर सबसे बहुमुखी और किफायती भंडारण समाधान। स्टोररूम और कार्यशालाओं में हल्के से मध्यम माल को व्यवस्थित करने के लिए बिल्कुल सही।',
+                specs: { 'Load Capacity': '100 - 300 KG per level', 'Shelving Material': 'Galvanized Steel / MDF', 'Adjustability': 'Pitch interval of 50mm', 'Assembly Type': 'Modular Nut & Bolt' }
+            },
+            {
+                id: 'mobile-compactor', category: 'Storage Systems', featured: true,
+                title: 'High-Density Mobile Compactor', titleHi: 'हाई-डेंसिटी मोबाइल कॉम्पैक्टर',
+                img: 'https://images.unsplash.com/photo-1587293852726-694364abdf47?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                desc: 'Maximize your existing floor space by up to 50% with our intelligent high-density mobile compactor systems. Racking bays move smoothly on floor rails.',
+                descHi: 'हमारे बुद्धिमान उच्च घनत्व वाले मोबाइल कॉम्पैक्टर सिस्टम के साथ अपने मौजूदा फ्लोर स्पेस को 50% तक बढ़ाएं।',
+                specs: { 'Space Efficiency': 'Increases capacity by 50%', 'Movement Mechanism': 'Ergonomic Mechanical Wheel', 'Safety Features': 'Anti-tilt & Central Locking', 'Rail Installation': 'Flush or Surface-mounted' }
+            },
+            {
+                id: 'pigeon-hole', category: 'Storage Systems', featured: false,
+                title: 'Multi-Compartment Pigeon Hole', titleHi: 'मल्टी-कम्पार्टमेंट पिजन होल',
+                img: 'https://images.unsplash.com/photo-1507208538289-4e61c3605e5e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                desc: 'The perfect organizational tool for sorting small parts, hardware components, or postal items. Each structural compartment acts as a highly visible individual bin.',
+                descHi: 'छोटे भागों, हार्डवेयर घटकों, या डाक वस्तुओं को छांटने के लिए सही संगठनात्मक उपकरण।',
+                specs: { 'Compartment Sizing': 'Customizable height & width grids', 'Material Construction': 'Prime MS Steel Sheets', 'Inventory Tracking': 'Labeling tag holders', 'Primary Usage': 'Hardware, Spares, Mailrooms' }
+            },
+            {
+                id: 'multi-tier', category: 'Storage Systems', featured: false,
+                title: 'Multi-Tier Racking System', titleHi: 'मल्टी-टियर रैकिंग सिस्टम',
+                img: 'https://images.unsplash.com/photo-1553413077-190dd305871c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                desc: 'Capitalize on the full height of your warehouse. Our multi-tier systems incorporate integrated walkways to create multiple levels of highly accessible picking storage.',
+                descHi: 'अपने गोदाम की पूरी ऊंचाई का लाभ उठाएं। हमारे मल्टी-टियर सिस्टम कई स्तरों का भंडारण बनाते हैं।',
+                specs: { 'Levels': '2 to 4 Tier Structures', 'Walkways': 'Steel Gratings / Anti-skid', 'Load': 'Customizable based on design', 'Usage': 'High-volume spare parts picking' }
+            },
+            {
+                id: 'mezzanine', category: 'Mezzanine Floor', featured: true,
+                title: 'Structural Mezzanine Floor', titleHi: 'स्ट्रक्चरल मेज़ानाइन फ्लोर',
+                img: 'https://images.unsplash.com/photo-1553413077-190dd305871c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                desc: 'Instantly double your usable floor space without relocating. Our highly robust structural Mezzanine floors create a safe, secondary tier above your existing area.',
+                descHi: 'स्थानांतरित किए बिना अपने उपयोगी फर्श स्थान को तुरंत दोगुना करें। हमारे अत्यधिक मजबूत मेज़ानाइन फर्श एक सुरक्षित माध्यमिक स्तर बनाते हैं।',
+                specs: { 'Load Bearing': '500 - 1500 KG per Sq.m', 'Decking Options': 'Steel Gratings or Plywood', 'Access Accessories': 'Staircases & Pallet Gates', 'Structural Build': 'Completely modular bolted' }
+            },
+            {
+                id: 'locker-6', category: 'Staff Lockers', featured: false,
+                title: '6-Door Metal Staff Locker', titleHi: '6-डोर मेटल स्टाफ लॉकर',
+                img: 'https://images.unsplash.com/photo-1595844730298-b960fa25e648?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                desc: 'Secure, durable, and ventilated storage for employee belongings. Manufactured from premium CRCA steel with a rust-proof finish.',
+                descHi: 'कर्मचारियों के सामान के लिए सुरक्षित और हवादार भंडारण। प्रीमियम सीआरसीए स्टील से निर्मित।',
+                specs: { 'Doors': '6 Individual Compartments', 'Locking Mechanism': 'Padlock hasp or cam lock', 'Ventilation': 'Punched louvers on each door', 'Finish': 'Scratch-resistant powder coating' }
+            },
+            {
+                id: 'locker-12', category: 'Staff Lockers', featured: false,
+                title: '12-Door Industrial Worker Locker', titleHi: '12-डोर औद्योगिक लॉकर',
+                img: 'https://images.unsplash.com/photo-1555529771-835f59bfc50c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                desc: 'Space-saving multi-tier locker system designed for high-headcount industrial environments. Provides secure compartments for a large workforce.',
+                descHi: 'अधिक कर्मचारियों वाले औद्योगिक वातावरण के लिए डिज़ाइन किया गया अंतरिक्ष-बचत लॉकर सिस्टम।',
+                specs: { 'Doors': '12 Individual Compartments', 'Material': 'Heavy-gauge CRCA Steel', 'Labeling': 'Name card holder on door', 'Usage': 'Factory workers, Schools' }
+            },
+            {
+                id: 'custom-locker', category: 'Staff Lockers', featured: false,
+                title: 'Custom Industrial Locker', titleHi: 'कस्टम औद्योगिक लॉकर',
+                img: 'https://images.unsplash.com/photo-1555529771-835f59bfc50c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                desc: 'Fully bespoke locker solutions engineered to your facility\'s exact dimensional and security requirements.',
+                descHi: 'आपकी सुविधा की सटीक आयामी और सुरक्षा आवश्यकताओं के लिए इंजीनियर किए गए पूरी तरह से कस्टम लॉकर समाधान।',
+                specs: { 'Configuration': 'Bespoke grid layouts', 'Material': 'CRCA Steel (Custom Gauge)', 'Locks': 'Digital, RFID, or Padlock', 'Extras': 'USB charging, Ventilation hooks' }
+            },
+            {
+                id: 'tool-trolley', category: 'Tool Trolley', featured: false,
+                title: 'Heavy Duty Mechanic Tool Trolley', titleHi: 'हैवी ड्यूटी टूल ट्रॉली',
+                img: 'https://images.unsplash.com/photo-1530124566582-a618bc2615dc?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                desc: 'Keep expensive tools organized, secure, and fully mobile. Featuring heavy-duty lockable castor wheels and smooth-gliding telescopic drawers.',
+                descHi: 'महंगे उपकरणों को व्यवस्थित, सुरक्षित और पूरी तरह से मोबाइल रखें। हैवी-ड्यूटी कैस्टर व्हील की विशेषता।',
+                specs: { 'Drawers': '5 to 7 Lockable Telescopic', 'Mobility': '4 Heavy-duty PU castors', 'Load per Drawer': 'Up to 45 KG UDL', 'Top Surface': 'High-grip rubber mat' }
+            },
+            {
+                id: 'work-station', category: 'Work Station', featured: false,
+                title: 'Industrial Work Station', titleHi: 'औद्योगिक वर्क स्टेशन',
+                img: 'https://images.unsplash.com/photo-1581092334651-ddf26d9a09d0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                desc: 'Ergonomically designed industrial workbenches engineered to increase worker productivity. Features a heavy-duty steel frame and built-in tool pegboards.',
+                descHi: 'कार्यकर्ता उत्पादकता बढ़ाने के लिए एर्गोनोमिक रूप से डिज़ाइन किए गए औद्योगिक कार्यक्षेत्र।',
+                specs: { 'Frame': 'Heavy Duty MS Tubular Section', 'Table Top': 'Laminated, ESD, or Steel', 'Accessories': 'Pegboard, LED light, Drawer', 'Ergonomics': 'Adjustable foot leveling' }
+            },
+            {
+                id: 'assembly-table', category: 'Assembly Table', featured: false,
+                title: 'Production Assembly Table', titleHi: 'उत्पादन असेंबली टेबल',
+                img: 'https://images.unsplash.com/photo-1565439390234-a3f25c786016?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                desc: 'Continuous inline assembly tables designed for sequential manufacturing processes. Built to withstand vibration and heavy component loads.',
+                descHi: 'अनुक्रमिक विनिर्माण प्रक्रियाओं के लिए डिज़ाइन की गई निरंतर असेंबली टेबल।',
+                specs: { 'Structure': 'Rigid welded/bolted steel frame', 'Surface Options': 'PVC, Stainless Steel, ESD Matting', 'Load Capacity': 'Up to 1000 KG uniform load', 'Modularity': 'Easily connectable in series' }
+            }
+        ];
+
+        /* -------------------------------------------
+           CURSOR & THEME LOGIC
+        ------------------------------------------- */
+        const dot = document.querySelector('.cursor-dot');
+        const ring = document.querySelector('.cursor-ring');
+        
+        if (dot && ring) {
+            window.addEventListener('mousemove', (e) => {
+                dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+                gsap.to(ring, { x: e.clientX, y: e.clientY, duration: 0.15, ease: "power2.out" });
+            });
+
+            document.querySelectorAll('a, button, input, select, textarea').forEach(el => {
+                el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+                el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+            });
+        }
+
+        // Scroll Progress
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.body.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.getElementById('scroll-progress').style.width = scrollPercent + '%';
+        });
+
+        // Dark Mode Toggle
+        const themeBtn = document.getElementById('theme-toggle-btn');
+        themeBtn.addEventListener('click', () => {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            themeBtn.innerHTML = isDark ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+        });
+
+        function toggleLang(lang, element) {
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            currentLang = lang;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if(i18n[lang] && i18n[lang][key]) {
+                    el.innerHTML = i18n[lang][key];
+                }
+            });
+
+            if(document.getElementById('page-products').classList.contains('active')) {
+                const activeFilterBtn = document.querySelector('#category-filters .btn-primary');
+                let currentFilter = 'All';
+                if(activeFilterBtn.innerText.includes('All') || activeFilterBtn.innerText.includes('सभी')) currentFilter = 'All';
+                else if(activeFilterBtn.innerText.includes('Duty') || activeFilterBtn.innerText.includes('ड्यूटी')) currentFilter = 'Heavy Duty';
+                else if(activeFilterBtn.innerText.includes('Storage') || activeFilterBtn.innerText.includes('स्टोरेज')) currentFilter = 'Storage Systems';
+                else if(activeFilterBtn.innerText.includes('Mezzanine') || activeFilterBtn.innerText.includes('मेज़ानाइन')) currentFilter = 'Mezzanine Floor';
+                else if(activeFilterBtn.innerText.includes('Staff') || activeFilterBtn.innerText.includes('स्टाफ')) currentFilter = 'Staff Lockers';
+                else if(activeFilterBtn.innerText.includes('Tool') || activeFilterBtn.innerText.includes('टूल')) currentFilter = 'Tool Trolley';
+                else if(activeFilterBtn.innerText.includes('Work') || activeFilterBtn.innerText.includes('वर्क')) currentFilter = 'Work Station';
+                else if(activeFilterBtn.innerText.includes('Assembly') || activeFilterBtn.innerText.includes('असेंबली')) currentFilter = 'Assembly Table';
+                
+                renderAllProducts(currentFilter);
+            } else {
+                renderFeatured();
+            }
+
+            if(document.getElementById('page-single-product').classList.contains('active')) {
+                const spTitle = document.querySelector('.sp-title').innerText;
+                const prod = productsDB.find(p => p.title === spTitle || p.titleHi === spTitle);
+                if(prod) viewProduct(prod.id);
+            }
+            ScrollTrigger.refresh();
+        }
+
+        /* -------------------------------------------
+           APPLE-LEVEL LENIS SMOOTH SCROLLING
+        ------------------------------------------- */
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+        });
+
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time)=>{ lenis.raf(time * 1000) });
+        gsap.ticker.lagSmoothing(0);
+
+        /* -------------------------------------------
+           MAGNETIC PREMIUM BUTTONS
+        ------------------------------------------- */
+        function initMagneticButtons() {
+            document.querySelectorAll('.magnetic-btn').forEach(btn => {
+                btn.addEventListener('mousemove', (e) => {
+                    const rect = btn.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    gsap.to(btn, { x: x * 0.4, y: y * 0.4, duration: 0.5, ease: "power2.out" });
+                });
+                btn.addEventListener('mouseleave', () => {
+                    gsap.to(btn, { x: 0, y: 0, duration: 0.9, ease: "elastic.out(1, 0.3)" });
+                });
+            });
+        }
+
+        /* -------------------------------------------
+           MEGA MENU IMAGE PREVIEW INTERACTION
+        ------------------------------------------- */
+        document.querySelectorAll('.mega-link').forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                const imgSrc = this.getAttribute('data-img');
+                const previewImg = document.getElementById('mega-preview-img');
+                if(previewImg && previewImg.src !== imgSrc) {
+                    gsap.to(previewImg, { opacity: 0.3, duration: 0.15, onComplete: () => {
+                        previewImg.src = imgSrc;
+                        gsap.to(previewImg, { opacity: 1, duration: 0.2 });
+                    }});
+                }
+            });
+        });
+
+        /* -------------------------------------------
+           FAQ ACCORDION LOGIC
+        ------------------------------------------- */
+        document.querySelectorAll('.faq-question').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const parent = btn.parentElement;
+                document.querySelectorAll('.faq-item').forEach(item => {
+                    if(item !== parent) item.classList.remove('active');
+                });
+                parent.classList.toggle('active');
+                ScrollTrigger.refresh();
+            });
+        });
+
+        /* -------------------------------------------
+           TOP NOTCH REPEATABLE STATS ANIMATION
+        ------------------------------------------- */
+        function playStatsAnimation(containerSelector) {
+            const statsRow = document.querySelector(containerSelector);
+            if(!statsRow) return;
+            
+            gsap.set(statsRow.querySelectorAll('.stat-box'), { y: 60, opacity: 0, scale: 0.8, filter: "blur(15px)" });
+            statsRow.querySelectorAll('.animated-counter').forEach(c => c.innerHTML = "0");
+
+            gsap.to(statsRow.querySelectorAll('.stat-box'), { 
+                y: 0, opacity: 1, scale: 1, filter: "blur(0px)", 
+                duration: 1.2, stagger: 0.15, ease: "elastic.out(1, 0.7)", delay: 0.2 
+            });
+
+            statsRow.querySelectorAll('.animated-counter').forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                let startObj = { val: 0 };
+                gsap.to(startObj, {
+                    val: target,
+                    duration: 3.5,
+                    ease: "power4.out",
+                    delay: 0.5,
+                    onUpdate: function() {
+                        counter.innerHTML = Math.floor(startObj.val);
+                    }
+                });
+            });
+        }
+
+        /* -------------------------------------------
+           FRAMER-LEVEL CINEMATIC PAGE TRANSITIONS
+        ------------------------------------------- */
+        let isAnimatingPage = false;
+        
+        function navigateTo(pageId) {
+            const target = document.getElementById(pageId);
+            if(!target || target.classList.contains('active') || isAnimatingPage) return;
+            isAnimatingPage = true;
+
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    document.querySelectorAll('.page-view').forEach(page => page.classList.remove('active'));
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.remove('active');
+                        if(link.getAttribute('data-target') === pageId) link.classList.add('active');
+                    });
+                    
+                    target.classList.add('active');
+                    
+                    lenis.scrollTo(0, {immediate: true});
+                    window.scrollTo(0,0);
+                    
+                    if(pageId === 'page-products') renderAllProducts('All');
+                    if(pageId === 'page-home') {
+                        window.dispatchEvent(new Event('resize')); 
+                        playStatsAnimation('#home-stats'); 
+                    }
+                    if(pageId === 'page-about') {
+                        playStatsAnimation('#about-stats'); 
+                    }
+                    
+                    ScrollTrigger.refresh();
+
+                    gsap.fromTo(target.querySelectorAll('.product-card'), 
+                        { opacity: 0, y: 100, scale: 0.9 }, 
+                        { opacity: 1, y: 0, scale: 1, duration: 0.8, stagger: 0.1, ease: "back.out(1.2)", delay: 0.3 }
+                    );
+                }
+            });
+
+            tl.to('.transition-overlay', { top: 0, duration: 0.7, ease: "power4.inOut" })
+              .to('.transition-overlay', { top: "-100%", duration: 0.7, ease: "power4.inOut", delay: 0.1 })
+              .set('.transition-overlay', { top: "100%" })
+              .add(() => { isAnimatingPage = false; });
+        }
+
+        /* -------------------------------------------
+           PRODUCT RENDERING
+        ------------------------------------------- */
+        function createProductCard(prod) {
+            const pTitle = currentLang === 'hi' ? (prod.titleHi || prod.title) : prod.title;
+            const pDesc = currentLang === 'hi' ? (prod.descHi || prod.desc) : prod.desc;
+            const pCat = currentLang === 'hi' && i18n['hi'][`cat-${prod.category.split(' ')[0].toLowerCase()}`] 
+                         ? i18n['hi'][`cat-${prod.category.split(' ')[0].toLowerCase()}`] : prod.category;
+
+            return `
+                <div class="product-card" onclick="viewProduct('${prod.id}')">
+                    <div class="img-wrapper">
+                        <span class="product-category">${pCat}</span>
+                        <img src="${prod.img}" alt="${pTitle}" class="product-image">
+                    </div>
+                    <div class="product-info">
+                        <h3>${pTitle}</h3>
+                        <p>${pDesc}</p>
+                        <span class="view-more">${currentLang === 'hi' ? 'विशेष विवरण देखें' : 'View Specifications'} <i class="fa-solid fa-arrow-right"></i></span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderFeatured() {
+            const grid = document.getElementById('featured-products-grid');
+            grid.innerHTML = productsDB.filter(p => p.featured).slice(0,3).map(createProductCard).join('');
+        }
+
+        function renderAllProducts(filterParam) {
+            const grid = document.getElementById('full-products-grid');
+            const title = document.getElementById('products-result-title');
+            
+            document.querySelectorAll('#category-filters button').forEach(b => {
+                const isMatch = filterParam === 'All' ? b.getAttribute('onclick').includes('All') : b.getAttribute('onclick').includes(`'${filterParam}'`);
+                b.className = isMatch ? 'btn btn-primary magnetic-btn' : 'btn btn-outline magnetic-btn';
+            });
+            initMagneticButtons(); 
+
+            let filtered = productsDB;
+            let displayTitle = currentLang === 'hi' ? 'सभी उत्पाद दिखा रहे हैं' : 'Showing All Products';
+            
+            if(filterParam !== 'All') {
+                filtered = productsDB.filter(p => p.category === filterParam);
+                const catTranslationKey = `cat-${filterParam.split(' ')[0].toLowerCase()}`;
+                const localizedCat = currentLang === 'hi' && i18n['hi'][catTranslationKey] ? i18n['hi'][catTranslationKey] : filterParam;
+                displayTitle = currentLang === 'hi' ? `${localizedCat} दिखा रहे हैं` : `${localizedCat} Solutions`;
+            }
+
+            title.innerText = displayTitle;
+
+            if(filtered.length === 0) grid.innerHTML = `<p style='font-size:18px; grid-column: 1/-1;'>${currentLang === 'hi' ? 'इस श्रेणी में कोई उत्पाद नहीं मिला।' : 'No products found in this category.'}</p>`;
+            else {
+                grid.innerHTML = filtered.map(createProductCard).join('');
+                gsap.fromTo(grid.querySelectorAll('.product-card'), 
+                    { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out" }
+                );
+            }
+        }
+
+        function filterCategory(cat) { 
+            if(document.getElementById('page-products').classList.contains('active')){
+                renderAllProducts(cat);
+            } else {
+                navigateTo('page-products');
+                setTimeout(()=>renderAllProducts(cat), 800); 
+            }
+        }
+
+        function directToWhatsApp(title) {
+            const msg = `Hello Rashmi Enterprises, I am interested in ordering: ${title}. Please provide more details and a quotation.`;
+            window.open(`https://wa.me/919370658141?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function viewProduct(id) {
+            const prod = productsDB.find(p => p.id === id);
+            if(!prod) return;
+
+            const pTitle = currentLang === 'hi' ? (prod.titleHi || prod.title) : prod.title;
+            const pDesc = currentLang === 'hi' ? (prod.descHi || prod.desc) : prod.desc;
+            const pCat = currentLang === 'hi' && i18n['hi'][`cat-${prod.category.split(' ')[0].toLowerCase()}`] 
+                         ? i18n['hi'][`cat-${prod.category.split(' ')[0].toLowerCase()}`] : prod.category;
+            const btnText = currentLang === 'hi' ? i18n['hi']['direct-wa'] : i18n['en']['direct-wa'];
+
+            const container = document.getElementById('single-product-container');
+            const specsHTML = Object.entries(prod.specs).map(([key, val]) => `<li>${key} <span>${val}</span></li>`).join('');
+
+            container.innerHTML = `
+                <div class="single-product-layout">
+                    <div class="sp-image-container gsap-up">
+                        <img src="${prod.img}" alt="${pTitle}">
+                    </div>
+                    <div class="sp-details gsap-up" style="transition-delay:0.2s;">
+                        <span class="sp-category">${pCat}</span>
+                        <h1 class="sp-title">${pTitle}</h1>
+                        <p class="sp-desc">${pDesc}</p>
+                        <ul class="sp-specs">${specsHTML}</ul>
+                        
+                        <button onclick="directToWhatsApp('${pTitle}')" class="btn btn-whatsapp-direct magnetic-btn">
+                            <i class="fa-brands fa-whatsapp" style="font-size: 22px;"></i> <span>${btnText}</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            initMagneticButtons();
+
+            const relatedGrid = document.getElementById('related-products-grid');
+            const related = productsDB.filter(p => p.category === prod.category && p.id !== id).slice(0,3);
+            if(related.length > 0) {
+                document.querySelector('.related-products').style.display = 'block';
+                relatedGrid.innerHTML = related.map(createProductCard).join('');
+            } else {
+                document.querySelector('.related-products').style.display = 'none';
+            }
+
+            navigateTo('page-single-product');
+        }
+
+        /* -------------------------------------------
+           SEARCH FUNCTIONALITY
+        ------------------------------------------- */
+        function executeSearch() {
+            const term = document.getElementById('global-search').value.toLowerCase();
+            if(!term) return filterCategory('All');
+            
+            if(!document.getElementById('page-products').classList.contains('active')) navigateTo('page-products');
+
+            setTimeout(() => {
+                const grid = document.getElementById('full-products-grid');
+                const title = document.getElementById('products-result-title');
+                const results = productsDB.filter(p => 
+                    p.title.toLowerCase().includes(term) || 
+                    (p.titleHi && p.titleHi.toLowerCase().includes(term)) ||
+                    p.category.toLowerCase().includes(term) || 
+                    p.desc.toLowerCase().includes(term)
+                );
+                
+                title.innerText = currentLang === 'hi' ? `"${term}" के लिए खोज परिणाम` : `Search Results for "${term}"`;
+                
+                if(results.length === 0) grid.innerHTML = `<p style="font-size:18px; grid-column:1/-1;">${currentLang === 'hi' ? 'कोई उत्पाद नहीं मिला।' : 'No products match your keyword.'}</p>`;
+                else {
+                    grid.innerHTML = results.map(createProductCard).join('');
+                    gsap.fromTo(grid.querySelectorAll('.product-card'), { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out" });
+                }
+            }, 800);
+        }
+        function handleSearch(e) { if(e.key === 'Enter') executeSearch(); }
+
+        /* -------------------------------------------
+           UI INTERACTIONS & ANIMATIONS
+        ------------------------------------------- */
+        function initGSAP() {
+            gsap.to(".hero-video", {
+                scale: 1.35,
+                opacity: 0.1,
+                scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 1 }
+            });
+
+            gsap.utils.toArray('.gsap-reveal').forEach(el => {
+                gsap.fromTo(el, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1.2, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 85%" } });
+            });
+            gsap.utils.toArray('.gsap-up').forEach(el => {
+                gsap.fromTo(el, { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 1, ease: "back.out(1.2)", scrollTrigger: { trigger: el, start: "top 90%" } });
+            });
+        }
+
+        /* -------------------------------------------
+           POPUP & WHATSAPP
+        ------------------------------------------- */
+        const popup = document.getElementById("enquiry-popup");
+        const specInput = document.getElementById("wa-specs");
+        const serviceSelect = document.getElementById("wa-service");
+
+        function openPopup() {
+            popup.style.display = "block";
+            gsap.to(popup, { opacity: 1, duration: 0.4 });
+            gsap.fromTo(".popup-content", { scale: 0.9, opacity: 0, y: 50 }, { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: "back.out(1.2)" });
+        }
+        
+        function closePopup() { 
+            gsap.to(".popup-content", { scale: 0.95, opacity: 0, y: -30, duration: 0.4, ease: "power2.in" });
+            gsap.to(popup, { opacity: 0, duration: 0.4, delay: 0.1, onComplete: () => popup.style.display = "none" }); 
+        }
+        
+        function copyToPopup() {
+            const h = document.getElementById("input-height").value;
+            const w = document.getElementById("input-width").value;
+            const l = document.getElementById("input-levels").value;
+            serviceSelect.value = "Custom 3D Setup";
+            specInput.value = `3D Configurator Output:\nHeight: ${h}cm\nWidth: ${w}cm\nLevels: ${l}`;
+            openPopup();
+        }
+
+        function sendToWhatsApp() {
+            const name = document.getElementById("wa-name").value;
+            const phone = document.getElementById("wa-phone").value;
+            const email = document.getElementById("wa-email").value;
+            const service = serviceSelect.value;
+            const specs = specInput.value;
+            
+            if(!name || !phone) { alert(currentLang==='hi'?'कृपया अपना नाम और फोन नंबर दर्ज करें।':"Please enter your name and phone number to continue."); return; }
+            
+            const msg = `*New Premium Web Enquiry*\n\n*Name:* ${name}\n*Phone:* ${phone}\n*Email:* ${email || 'N/A'}\n*Service Category:* ${service}\n\n*Message / Specs:*\n${specs}`;
+            window.open(`https://wa.me/919370658141?text=${encodeURIComponent(msg)}`, '_blank');
+            closePopup();
+        }
+
+        /* -------------------------------------------
+           THREE.JS 3D CONFIGURATOR (NEXT LEVEL REALISM)
+        ------------------------------------------- */
+        let scene, camera, renderer, controls, rackGroup;
+        
+        function createMetalTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,512,512);
+            for(let i=0; i<40000; i++){
+                ctx.fillStyle = Math.random() > 0.5 ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)';
+                ctx.fillRect(Math.random()*512, Math.random()*512, 2, 2);
+            }
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping; texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(2, 2);
+            return texture;
+        }
+
+        const metalRoughnessMap = createMetalTexture();
+
+        const matPillar = new THREE.MeshStandardMaterial({ 
+            color: 0x0A4A22, metalness: 0.6, roughness: 0.4, 
+            roughnessMap: metalRoughnessMap, bumpMap: metalRoughnessMap, bumpScale: 0.02
+        }); 
+        const matShelf = new THREE.MeshStandardMaterial({ 
+            color: 0x666666, metalness: 0.5, roughness: 0.5,
+            roughnessMap: metalRoughnessMap, bumpMap: metalRoughnessMap, bumpScale: 0.02
+        });
+        const matPallet = new THREE.MeshStandardMaterial({ color: 0xd2a679, roughness: 0.9 }); // Wooden pallet color
+        const matBox = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 0.7 }); // Cardboard box color
+
+        const slHeight = document.getElementById('slider-height'); const inHeight = document.getElementById('input-height');
+        const slWidth = document.getElementById('slider-width'); const inWidth = document.getElementById('input-width');
+        const slLevels = document.getElementById('slider-levels'); const inLevels = document.getElementById('input-levels');
+
+        function syncInputs(source, target) { target.value = source.value; buildRack(); }
+
+        slHeight.addEventListener('input', () => syncInputs(slHeight, inHeight));
+        inHeight.addEventListener('input', () => syncInputs(inHeight, slHeight));
+        slWidth.addEventListener('input', () => syncInputs(slWidth, inWidth));
+        inWidth.addEventListener('input', () => syncInputs(inWidth, slWidth));
+        slLevels.addEventListener('input', () => syncInputs(slLevels, inLevels));
+        inLevels.addEventListener('input', () => syncInputs(inLevels, slLevels));
+
+        function init3D() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 1, 4000); 
+            camera.position.set(600, 500, 700);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" }); 
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); 
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true; controls.dampingFactor = 0.04; controls.maxPolarAngle = Math.PI / 2 + 0.1;
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(300, 1000, 500); 
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 2048; 
+            dirLight.shadow.mapSize.height = 2048;
+            scene.add(dirLight);
+
+            const fillLight = new THREE.DirectionalLight(0xeef2f0, 0.4);
+            fillLight.position.set(-300, 500, -500);
+            scene.add(fillLight);
+
+            rackGroup = new THREE.Group(); scene.add(rackGroup);
+            
+            const grid = new THREE.GridHelper(2000, 50, 0x888888, 0x444444);
+            grid.position.y = -0.1; 
+            grid.material.transparent = true;
+            grid.material.opacity = 0.2;
+            scene.add(grid);
+
+            buildRack(); animate();
+
+            window.addEventListener('resize', () => {
+                if(!container.clientWidth) return;
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        }
+
+        function buildRack() {
+            while(rackGroup.children.length > 0) rackGroup.remove(rackGroup.children[0]); 
+            
+            const h = parseFloat(inHeight.value); const w = parseFloat(inWidth.value); const levels = parseInt(inLevels.value);
+            const depth = 100; const pt = 8; const st = 5;
+
+            const maxDimension = Math.max(h, w);
+            gsap.to(camera.position, {
+                x: maxDimension * 0.9, y: maxDimension * 0.7, z: maxDimension * 1.3,
+                duration: 1, ease: "power3.out"
+            });
+            gsap.to(controls.target, { x: 0, y: h/2, z: 0, duration: 1, ease: "power3.out" });
+
+            const pillarGeo = new THREE.BoxGeometry(pt, h, pt);
+            
+            // Base plates for pillars for realism
+            const baseGeo = new THREE.BoxGeometry(pt*2, 2, pt*2);
+            const matBase = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
+
+            const positions = [
+                [-w/2, h/2, -depth/2], [w/2, h/2, -depth/2], [-w/2, h/2, depth/2], [w/2, h/2, depth/2]
+            ];
+
+            positions.forEach(pos => {
+                const pillar = new THREE.Mesh(pillarGeo, matPillar);
+                pillar.position.set(...pos); pillar.castShadow = true; pillar.receiveShadow = true; rackGroup.add(pillar);
+                
+                const base = new THREE.Mesh(baseGeo, matBase);
+                base.position.set(pos[0], 1, pos[2]); rackGroup.add(base);
+            });
+
+            // Cross bracing (Diagonals) on the sides
+            const bracingGeo = new THREE.BoxGeometry(2, Math.sqrt(h*h + depth*depth), 2);
+            const bracing1 = new THREE.Mesh(bracingGeo, matShelf);
+            bracing1.position.set(-w/2, h/2, 0);
+            bracing1.rotation.x = Math.atan2(depth, h);
+            rackGroup.add(bracing1);
+            
+            const bracing2 = new THREE.Mesh(bracingGeo, matShelf);
+            bracing2.position.set(w/2, h/2, 0);
+            bracing2.rotation.x = -Math.atan2(depth, h);
+            rackGroup.add(bracing2);
+
+            const shelfGeo = new THREE.BoxGeometry(w + pt, st, depth + pt);
+            const spacing = (h - 30) / (levels - 1);
+            
+            for(let i=0; i<levels; i++) {
+                const shelfY = 20 + (i * spacing);
+                const shelf = new THREE.Mesh(shelfGeo, matShelf);
+                shelf.position.set(0, shelfY, 0);
+                shelf.castShadow = true; shelf.receiveShadow = true; rackGroup.add(shelf);
+
+                // Add realistic pallets & boxes randomly on shelves (except top shelf sometimes)
+                if(i < levels - 1 || Math.random() > 0.5) {
+                    const numPallets = Math.floor(w / 120); // fit multiple pallets
+                    for(let j=0; j<numPallets; j++) {
+                        const px = -w/2 + 60 + (j * 120);
+                        
+                        // Pallet
+                        const pallet = new THREE.Mesh(new THREE.BoxGeometry(100, 10, depth*0.8), matPallet);
+                        pallet.position.set(px, shelfY + st/2 + 5, 0);
+                        pallet.castShadow = true; rackGroup.add(pallet);
+                        
+                        // Box on Pallet
+                        const boxHeight = 30 + Math.random() * 40;
+                        const box = new THREE.Mesh(new THREE.BoxGeometry(90, boxHeight, depth*0.7), matBox);
+                        box.position.set(px, shelfY + st/2 + 10 + boxHeight/2, 0);
+                        box.castShadow = true; rackGroup.add(box);
+                    }
+                }
+            }
+        }
+
+        function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
+
+        /* -------------------------------------------
+           INITIALIZATION & LOADER
+        ------------------------------------------- */
+        window.addEventListener('load', () => {
+            gsap.to('.loader-line', { width: "100%", duration: 1, ease: "power2.inOut", onComplete: () => {
+                gsap.to('#loader', { y: "-100%", duration: 0.8, ease: "power4.inOut", onComplete: () => {
+                    document.getElementById('loader').style.display = 'none';
+                    
+                    renderFeatured(); 
+                    init3D(); 
+                    initGSAP();
+                    initMagneticButtons();
+                    playStatsAnimation('#home-stats'); // Initial run for Home
+                    
+                    gsap.fromTo('.hero-content h1', { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease: "back.out(1.2)" });
+                    gsap.fromTo('.hero-content p', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1, delay: 0.2, ease: "power3.out" });
+                    gsap.fromTo('.hero-buttons', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1, delay: 0.4, ease: "power3.out" });
+                }});
+            }});
+        });
+
+    </script>
+</body>
+</html>
