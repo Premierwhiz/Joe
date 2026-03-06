@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provista Hub - Secure Billing Portal</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script type="importmap">
+        {
+            "imports": {
+                "react": "https://esm.sh/react@18.2.0",
+                "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+                "lucide-react": "https://esm.sh/lucide-react@0.263.1"
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        /* Print Styles */
+        @media print {
+            @page { margin: 10mm; size: A4; }
+            body { background: white; -webkit-print-color-adjust: exact; }
+            
+            aside, .no-print, .print\:hidden { display: none !important; }
+            
+            main { 
+                height: auto !important; 
+                overflow: visible !important; 
+                width: 100% !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+            }
+            
+            .print\:shadow-none { box-shadow: none !important; }
+            .print\:w-full { width: 100% !important; max-width: 100% !important; }
+            .print\:p-0 { padding: 0 !important; }
+            .print\:block { display: block !important; }
+            
+            header { display: flex !important; margin-bottom: 20px !important; page-break-inside: avoid; }
+            
+            * { overflow: visible !important; }
+
+            .page-break { page-break-before: always; break-before: page; display: block !important; }
+            .terms-page { min-height: 250mm; }
+        }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans antialiased">
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useMemo, createContext, useContext } from 'react';
+        import ReactDOM from 'react-dom/client';
+        import { 
+            LayoutDashboard, FileText, Plus, Trash2, Save, Printer, 
+            Download, Send, LogOut, Shield, Lock, Unlock, 
+            History, Building2, UserCircle, Search, ChevronLeft, 
+            CheckCircle, AlertTriangle, FileSpreadsheet, Mail, RefreshCcw, Loader2, FileCheck,
+            Database, Copy, Truck, MessageSquare, AlertCircle, RefreshCw, Upload
+        } from 'lucide-react';
+
+        // ==========================================
+        // 1. MOCK BACKEND & DATABASE (SIMULATION)
+        // ==========================================
+        
+        const MOCK_DELAY = 1000; 
+
+        const mockDb = {
+            get: (key) => JSON.parse(localStorage.getItem(key) || '[]'),
+            set: (key, val) => localStorage.setItem(key, JSON.stringify(val)),
+        };
+
+        const api = {
+            auth: {
+                login: async (role) => {
+                    return new Promise((resolve) => {
+                        setTimeout(() => resolve({ id: 'u1', name: 'Demo User', role, token: 'mock_token' }), 600);
+                    });
+                }
+            },
+            // Updated Delivery System (Client-Side Real Send)
+            delivery: {
+                send: async (type, recipient, invoice) => {
+                    // 1. Log Intent
+                    const logId = Date.now();
+                    const newLog = { 
+                        id: logId, 
+                        invoiceId: invoice.id, 
+                        type: type, // 'EMAIL' or 'WHATSAPP'
+                        recipient: recipient, 
+                        status: 'PENDING', 
+                        timestamp: new Date().toISOString(),
+                        provider: type === 'EMAIL' ? 'Mail Client' : 'WhatsApp Web'
+                    };
+                    
+                    const existingLogs = mockDb.get('pvh_logs');
+                    mockDb.set('pvh_logs', [...existingLogs, newLog]);
+
+                    return new Promise((resolve) => {
+                        console.log(`[${type}] Opening client for ${recipient}...`);
+                        
+                        setTimeout(() => {
+                            let success = true;
+                            
+                            // 2. Real Client-Side Delivery
+                            try {
+                                if (type === 'WHATSAPP') {
+                                    // Use Client's Number directly
+                                    const targetNumber = recipient;
+                                    
+                                    // Clean the number (remove non-digits)
+                                    const phone = targetNumber.replace(/\D/g, ''); 
+                                    
+                                    // Create Message Text
+                                    const link = invoice.pdfUrl || 'https://provistahub.com/invoices';
+                                    
+                                    // Message to Customer
+                                    const text = encodeURIComponent(
+                                        `Hello *${invoice.clientName}*,\n\n` +
+                                        `Here is your invoice *${invoice.invoiceNo}* for *${formatCurrency(invoice.grandTotal)}*.\n\n` +
+                                        `You can view and download it here:\n${link}\n\n` +
+                                        `Thank you,\n*Provista Hub*`
+                                    );
+
+                                    window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+                                    
+                                } else if (type === 'EMAIL') {
+                                    const subject = encodeURIComponent(`Invoice ${invoice.invoiceNo} from Provista Hub`);
+                                    const link = invoice.pdfUrl || 'https://provistahub.com/invoices';
+                                    const body = encodeURIComponent(
+                                        `Dear ${invoice.clientName},\n\n` +
+                                        `Please find attached the invoice details below:\n\n` +
+                                        `Invoice No: ${invoice.invoiceNo}\n` +
+                                        `Total Amount: ${formatCurrency(invoice.grandTotal)}\n\n` +
+                                        `You can view/download your invoice here: ${link}\n\n` +
+                                        `If you have any questions, feel free to contact us.\n\n` +
+                                        `Regards,\nProvista Hub Team`
+                                    );
+                                    window.open(`mailto:${recipient}?subject=${subject}&body=${body}`, '_self');
+                                }
+                            } catch (e) {
+                                success = false;
+                                console.error(e);
+                            }
+
+                            // 3. Update Log Status
+                            const logs = mockDb.get('pvh_logs');
+                            const updatedLogs = logs.map(l => 
+                                l.id === logId ? { 
+                                    ...l, 
+                                    status: success ? 'SENT' : 'FAILED', 
+                                    error: success ? null : 'Client Launch Failed' 
+                                } : l
+                            );
+                            mockDb.set('pvh_logs', updatedLogs);
+                            resolve({ success, logId });
+                        }, 500); // Short delay to allow UI to update
+                    });
+                },
+                getLogs: async (invoiceId) => {
+                    return new Promise((resolve) => {
+                        const logs = mockDb.get('pvh_logs');
+                        // Filter logs for this invoice and sort by newest first
+                        const relevant = logs
+                            .filter(l => l.invoiceId === invoiceId)
+                            .sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+                        resolve(relevant);
+                    });
+                },
+                retry: async (logId) => {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            const logs = mockDb.get('pvh_logs');
+                            const target = logs.find(l => l.id === logId);
+                            if(!target) { resolve(false); return; }
+
+                            const updatedLogs = logs.map(l => 
+                                l.id === logId ? { ...l, status: 'SENT', error: null, timestamp: new Date().toISOString() } : l
+                            );
+                            mockDb.set('pvh_logs', updatedLogs);
+                            resolve(true);
+                        }, 500);
+                    });
+                }
+            },
+            invoices: {
+                list: async () => {
+                    return new Promise((resolve) => {
+                        setTimeout(() => resolve(mockDb.get('pvh_invoices')), 600);
+                    });
+                },
+                save: async (invoicePayload) => {
+                    return new Promise((resolve, reject) => {
+                        setTimeout(() => {
+                            const invoices = mockDb.get('pvh_invoices');
+                            const existing = invoices.find(i => i.id === invoicePayload.id);
+
+                            if (existing && (existing.status === 'FINAL' || existing.status === 'PAID')) {
+                                if (invoicePayload.status === existing.status || invoicePayload.status === 'FINAL') {
+                                    // Relaxed security for demo: allow updating non-financial fields
+                                }
+                            }
+
+                            const computedSubTotal = invoicePayload.items.reduce((sum, item) => sum + (Number(item.price) * Number(item.qty)), 0);
+                            const isIntra = invoicePayload.placeOfSupply === 'Intra-State';
+                            
+                            const computedTaxes = isIntra
+                                ? { cgst: computedSubTotal * 0.09, sgst: computedSubTotal * 0.09, igst: 0 }
+                                : { cgst: 0, sgst: 0, igst: computedSubTotal * 0.18 };
+                            
+                            const computedGrandTotal = computedSubTotal + computedTaxes.cgst + computedTaxes.sgst + computedTaxes.igst;
+
+                            let finalInvoiceNo = existing ? existing.invoiceNo : (invoicePayload.invoiceNo || 'DRAFT');
+                            let finalPdfData = existing ? { pdfUrl: existing.pdfUrl, pdfHash: existing.pdfHash } : { pdfUrl: null, pdfHash: null };
+
+                            if (invoicePayload.status === 'FINAL') {
+                                if (!finalInvoiceNo || finalInvoiceNo === 'DRAFT') {
+                                    const year = new Date().getFullYear();
+                                    const seq = parseInt(localStorage.getItem('pvh_sequence') || '1');
+                                    localStorage.setItem('pvh_sequence', (seq + 1).toString());
+                                    const prefix = invoicePayload.type === 'CREDIT_NOTE' ? 'CN' : 'PVH';
+                                    finalInvoiceNo = `${prefix}/${year}/${seq.toString().padStart(4, '0')}`;
+                                }
+                                
+                                if (!existing || existing.status === 'DRAFT') {
+                                    const uniqueStr = finalInvoiceNo + computedGrandTotal + new Date().toISOString();
+                                    finalPdfData.pdfUrl = `https://cdn.provistahub.com/secure/invoices/${new Date().getFullYear()}/${finalInvoiceNo.replace(/\//g,'_')}.pdf`;
+                                    finalPdfData.pdfHash = btoa(uniqueStr).slice(0, 32); 
+                                }
+                            }
+
+                            const savedInvoice = {
+                                ...invoicePayload,
+                                invoiceNo: finalInvoiceNo,
+                                subTotal: computedSubTotal,
+                                taxes: computedTaxes,
+                                grandTotal: computedGrandTotal,
+                                ...finalPdfData,
+                                updatedAt: new Date().toISOString()
+                            };
+
+                            let newInvoices;
+                            if (existing) {
+                                newInvoices = invoices.map(i => i.id === invoicePayload.id ? savedInvoice : i);
+                            } else {
+                                newInvoices = [...invoices, savedInvoice];
+                            }
+                            mockDb.set('pvh_invoices', newInvoices);
+                            resolve(savedInvoice);
+                        }, MOCK_DELAY);
+                    });
+                },
+                delete: async (id) => {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            const invoices = mockDb.get('pvh_invoices');
+                            mockDb.set('pvh_invoices', invoices.filter(i => i.id !== id));
+                            resolve({ success: true });
+                        }, 600);
+                    });
+                }
+            }
+        };
+
+        const APP_VERSION = "3.7.0 (Stamp-v1)";
+
+        const ROLES = {
+            ADMIN: { label: 'Administrator', permissions: ['read', 'write', 'delete', 'export', 'finalize', 'credit_note'] }, 
+            STAFF: { label: 'Staff', permissions: ['read', 'write', 'finalize'] },
+            VIEWER: { label: 'Auditor/Viewer', permissions: ['read', 'export'] }
+        };
+
+        const INVOICE_STATUS = {
+            DRAFT: { label: 'Draft', color: 'bg-gray-100 text-gray-700', icon: Unlock },
+            FINAL: { label: 'Finalized', color: 'bg-green-100 text-green-800', icon: Lock },
+            PAID: { label: 'Paid', color: 'bg-blue-100 text-blue-800', icon: CheckCircle },
+            CANCELLED: { label: 'Cancelled', color: 'bg-red-100 text-red-800', icon: AlertTriangle }
+        };
+
+        const INVOICE_TYPES = {
+            TAX: { label: 'TAX INVOICE', color: 'text-gray-800' }, 
+            PROFORMA: { label: 'PROFORMA INVOICE', color: 'text-blue-600' },
+            CREDIT_NOTE: { label: 'CREDIT NOTE', color: 'text-red-600' }
+        };
+
+        const DEFAULT_COMPANY = {
+            id: 'comp_1',
+            name: "Provista Hub",
+            address: "HiTECH City, Hyderabad, India",
+            gstin: "36ABCDE1234F1Z5",
+            email: "support@provistahub.com",
+            phone: "+91 8084843501",
+            pan: "ABCDE1234F",
+            bankName: "HDFC Bank",
+            accountNo: "50100123456789",
+            ifsc: "HDFC0001234",
+            upiId: "provistahub@upi"
+        };
+
+        // ==========================================
+        // CONFIG: WHATSAPP DELIVERY SETTINGS
+        // ==========================================
+        // No longer forcing admin number. Messages go to Client Phone.
+        const WHATSAPP_TARGET_NUMBER = ""; 
+
+        const LOGO_SRC = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNTAgODAiPjx0ZXh0IHg9IjAiIHk9IjU1IiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtc2l6ZT0iNDgiPjx0c3BhbiBmaWxsPSIjNjFmMjljIj5Qcm92aXN0YTwvdHNwYW4+IDx0c3BhbiBmaWxsPSIjMWUyOTNiIj5IdWI8L3RzcGFuPjwvdGV4dD48L3N2Zz4=";
+
+        // PLACEHOLDER: These are default placeholders. User can override them via upload in the editor.
+        const SIGNATURE_SRC = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgNjAiPjxwYXRoIGQ9Ik0yMCw0MCBDNTAsMTAgODAsNTAgMTEwLDIwIFMxNzAsNTAgMTkwLDMwIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIGZpbGw9Im5vbmUiLz48L3N2Zz4=";
+        const STAMP_SRC = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgc3Ryb2tlPSIjMWU0MGFmIiBzdHJva2Utd2lkdGg9IjMiIGZpbGw9Im5vbmUiIG9wYWNpdHk9IjAuNyIvPjx0ZXh0IHg9IjUwIiB5PSI1NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzFlNDBhZiIgZm9udC1zaXplPSIxNCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXdlaWdodD0iYm9sZCIgdHJhbnNmb3JtPSJyb3RhdGUoLTE1IDUwIDUwKSIgb3BhY2l0eT0iMC43Ij5QUk9WSVNUQTwvdGV4dD48L3N2Zz4=";
+
+        const MASTER_CATALOG = [
+            // ATS Resume Services
+            { id: 'ats_student', category: "ATS Resume Services", name: "Student/Fresher Resume (ATS)", price: 99, sac: "998311" },
+            { id: 'ats_pro', category: "ATS Resume Services", name: "Professional Resume (1-5 Yrs Exp)", price: 149, sac: "998311" },
+            { id: 'ats_senior', category: "ATS Resume Services", name: "Senior Level Resume (5+ Yrs Exp)", price: 249, sac: "998311" },
+            { id: 'ats_cover', category: "ATS Resume Services", name: "Custom Cover Letter", price: 199, sac: "998311" },
+            { id: 'ats_linkedin', category: "ATS Resume Services", name: "LinkedIn Profile Optimization", price: 219, sac: "998311" },
+
+            // Content Creation
+            { id: 'content_blog', category: "Content Creation", name: "Standard Blog Post (500-800 words)", price: 200, sac: "998391" },
+            { id: 'content_article', category: "Content Creation", name: "In-Depth Article (1000+ words)", price: 300, sac: "998391" },
+            { id: 'content_copy', category: "Content Creation", name: "Copywriting (per page/section)", price: 200, sac: "998391" },
+            { id: 'content_starter', category: "Content Creation", name: "Starter (4 Blogs/Articles)", price: 500, sac: "998391" },
+            { id: 'content_pro', category: "Content Creation", name: "Pro (8 Blogs + Social Media)", price: 600, sac: "998391" },
+
+            // Graphics Designer Services
+            { id: 'gfx_logo', category: "Graphics Design", name: "Logo Design (3 concepts)", price: 99, sac: "998314" },
+            { id: 'gfx_brochure', category: "Graphics Design", name: "Brochure/Flyer Design", price: 400, sac: "998314" },
+            { id: 'gfx_social', category: "Graphics Design", name: "Social Media Post (set of 10)", price: 800, sac: "998314" },
+            { id: 'gfx_basic', category: "Graphics Design", name: "Basic (Logo + Business Card)", price: 200, sac: "998314" },
+            { id: 'gfx_complete', category: "Graphics Design", name: "Complete (Logo, Brand Guide, Stationery)", price: 390, sac: "998314" },
+
+            // Web Development
+            { id: 'web_basic', category: "Web Development", name: "Basic (Informational)", price: 20000, sac: "998315" },
+            { id: 'web_lead', category: "Web Development", name: "Lead Generation Focus (with Form)", price: 30000, sac: "998315" },
+            { id: 'web_small', category: "Web Development", name: "Small Business (5-10 Pages, CMS)", price: 50000, sac: "998315" },
+            { id: 'web_corp', category: "Web Development", name: "Corporate Site (10+ Pages, Advanced Features)", price: 90000, sac: "998315" },
+            { id: 'web_store_basic', category: "Web Development", name: "Basic Store (Shopify/WooCommerce)", price: 80000, sac: "998315" },
+            { id: 'web_store_adv', category: "Web Development", name: "Advanced Store (Custom Features, Integrations)", price: 180000, sac: "998315" },
+            { id: 'web_app', category: "Web Development", name: "Simple App (Specific Functionality)", price: 150000, sac: "998315" },
+            { id: 'web_platform', category: "Web Development", name: "Complex Platform (SaaS, Portal)", price: 350000, sac: "998315" },
+
+            // Digital Marketing
+            { id: 'dm_smm', category: "Digital Marketing", name: "Social Media Management (Monthly)", price: 2000, sac: "998365" },
+            { id: 'dm_full', category: "Digital Marketing", name: "Full Digital Marketing (SEO + SMM + Ads)", price: 4000, sac: "998365" },
+            { id: 'dm_ppc_setup', category: "Digital Marketing", name: "PPC Ad Campaign Setup", price: 7000, sac: "998365" },
+
+            // Catalogues
+            { id: 'cat_basic', category: "Catalogues", name: "Basic Design (5–10 pages)", price: 3000, sac: "998314" },
+            { id: 'cat_pro', category: "Catalogues", name: "Professional Design (10–20 pages)", price: 7000, sac: "998314" },
+            { id: 'cat_premium', category: "Catalogues", name: "Premium / Interactive Catalogue", price: 12000, sac: "998314" },
+
+            // AI & Automation
+            { id: 'ai_chatbot', category: "AI & Automation", name: "Chatbot Setup", price: 15000, sac: "998315" },
+            { id: 'ai_workflow', category: "AI & Automation", name: "Workflow Automation (per workflow)", price: 8000, sac: "998315" },
+            { id: 'ai_consult', category: "AI & Automation", name: "Consultation (per hour)", price: 3500, sac: "998315" },
+
+            // Google Ads
+            { id: 'ads_basic', category: "Google Ads", name: "Basic Setup (1 Ad Group, 5 Ads)", price: 10000, sac: "998365" },
+            { id: 'ads_adv', category: "Google Ads", name: "Advanced Setup (Multiple Ad Groups)", price: 18000, sac: "998365" },
+            { id: 'ads_tier1', category: "Google Ads", name: "Tier 1 Mgmt (Ad Spend < 50k)", price: 5000, sac: "998365" },
+
+            // SEO Services
+            { id: 'seo_starter', category: "SEO Services", name: "Starter (Small Business / Local)", price: 10000, sac: "998315" },
+            { id: 'seo_pro', category: "SEO Services", name: "Professional (Growing Business)", price: 22000, sac: "998315" },
+            { id: 'seo_ent', category: "SEO Services", name: "Enterprise (Large Scale / E-commerce)", price: 45000, sac: "998315" },
+            { id: 'seo_audit', category: "SEO Services", name: "Comprehensive SEO Audit", price: 8000, sac: "998315" },
+            { id: 'seo_tech', category: "SEO Services", name: "Technical SEO Fixes", price: 12000, sac: "998315" },
+            { id: 'seo_local', category: "SEO Services", name: "Local SEO Setup (GMB)", price: 6000, sac: "998315" },
+        ];
+
+        const formatCurrency = (amount) => 
+            new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(Number(amount) || 0);
+
+        const formatDate = (dateString) => {
+            if (!dateString) return "";
+            return new Date(dateString).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        };
+
+        const numberToWords = (n) => {
+            if (!n || n === 0) return "Zero";
+            const units = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+            const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+            const convertGroup = (n) => {
+                if (n < 20) return units[n];
+                return tens[Math.floor(n / 10)] + (n % 10 ? " " + units[n % 10] : "");
+            };
+            let str = "";
+            if (Math.floor(n / 10000000) > 0) { str += convertGroup(Math.floor(n / 10000000)) + " Crore "; n %= 10000000; }
+            if (Math.floor(n / 100000) > 0) { str += convertGroup(Math.floor(n / 100000)) + " Lakh "; n %= 100000; }
+            if (Math.floor(n / 1000) > 0) { str += convertGroup(Math.floor(n / 1000)) + " Thousand "; n %= 1000; }
+            if (Math.floor(n / 100) > 0) { str += convertGroup(Math.floor(n / 100)) + " Hundred "; n %= 100; }
+            if (n > 0) { if (str !== "") str += "and "; str += convertGroup(n); }
+            return str.trim() + " Rupees Only";
+        };
+
+        const AuthContext = createContext(null);
+        const DataContext = createContext(null);
+
+        function App() {
+            const [user, setUser] = useState(null);
+            const [loading, setLoading] = useState(false);
+            const [invoices, setInvoices] = useState([]);
+
+            const refreshData = async () => {
+                setLoading(true);
+                try {
+                    const data = await api.invoices.list();
+                    setInvoices(data || []);
+                } catch (e) {
+                    setInvoices([]);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            useEffect(() => {
+                if (user) refreshData();
+            }, [user]);
+
+            const login = async (role) => {
+                setLoading(true);
+                const u = await api.auth.login(role);
+                setUser(u);
+                setLoading(false);
+            };
+
+            const logout = () => setUser(null);
+
+            if (!user) return <LoginScreen onLogin={login} loading={loading} />;
+
+            return (
+                <AuthContext.Provider value={{ user, logout }}>
+                    <DataContext.Provider value={{ invoices, refreshData, loading }}>
+                        <DashboardLayout />
+                    </DataContext.Provider>
+                </AuthContext.Provider>
+            );
+        }
+
+        function LoginScreen({ onLogin, loading }) {
+            const [selectedRole, setSelectedRole] = useState(null);
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+
+            const handleRoleSelect = (role) => {
+                setSelectedRole(role);
+                setError('');
+                setPassword('');
+            };
+
+            const handleLogin = () => {
+                const storedPass = localStorage.getItem(`pwd_${selectedRole}`) || '1234';
+                if (password === storedPass) {
+                    onLogin(selectedRole);
+                } else {
+                    setError('Incorrect Password');
+                }
+            };
+
+            const handleForgotPassword = () => {
+                if (selectedRole === 'ADMIN') {
+                    const masterKey = prompt("Enter Master Key to reset password:");
+                    if (masterKey === 'master') {
+                        const newPass = prompt("Enter new password:");
+                        if (newPass) {
+                            localStorage.setItem(`pwd_${selectedRole}`, newPass);
+                            alert("Password updated successfully.");
+                        }
+                    } else {
+                        alert("Invalid Master Key.");
+                    }
+                } else {
+                    alert("Please contact the Administrator to reset your password.");
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md text-center">
+                        <div className="mb-8">
+                            <h1 className="text-2xl font-bold text-gray-800 mb-2">Secure Billing Portal</h1>
+                            <p className="text-gray-500">Provista Hub Enterprise System</p>
+                        </div>
+                        
+                        {loading ? (
+                            <div className="py-12 flex justify-center"><Loader2 className="animate-spin text-green-600" size={32} /></div>
+                        ) : (
+                            <div className="space-y-3">
+                                {!selectedRole ? (
+                                    <>
+                                        <button onClick={() => handleRoleSelect('ADMIN')} className="w-full bg-gray-800 hover:bg-gray-900 text-white p-4 rounded-xl font-bold flex items-center justify-between group transition-all">
+                                            <div className="text-left"><p className="text-sm text-gray-400">Log in as</p><p className="text-lg">Administrator</p></div>
+                                            <span className="bg-gray-700 px-3 py-1 rounded text-xs group-hover:bg-green-600 transition-colors">Full Access</span>
+                                        </button>
+                                    </>
+                                ) : (
+                                    <div className="text-left animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                        <button onClick={() => setSelectedRole(null)} className="text-sm text-gray-500 hover:text-gray-800 mb-4 flex items-center gap-1"><ChevronLeft size={16}/> Back</button>
+                                        <h3 className="text-lg font-bold mb-4">Enter Admin Password</h3>
+                                        <input 
+                                            type="password" 
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            className="w-full border border-gray-300 p-3 rounded-lg mb-2 focus:ring-2 focus:ring-green-500 outline-none"
+                                            placeholder="Enter password (default: 1234)"
+                                            onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                                        />
+                                        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+                                        <button onClick={handleLogin} className="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg font-bold mb-3">
+                                            Login
+                                        </button>
+                                        <button onClick={handleForgotPassword} className="w-full text-sm text-blue-600 hover:underline">
+                                            Forgot Password?
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        <p className="mt-8 text-xs text-gray-400">System v{APP_VERSION} • Secure Connection</p>
+                    </div>
+                </div>
+            );
+        }
+
+        function DashboardLayout() {
+            const { user, logout } = useContext(AuthContext);
+            const [view, setView] = useState('list'); 
+            const [activeInvoice, setActiveInvoice] = useState(null);
+            const roleInfo = ROLES[user.role] || ROLES.VIEWER;
+
+            return (
+                <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+                    <aside className="w-full md:w-64 bg-gray-900 text-white flex-shrink-0 no-print">
+                        <div className="p-6 border-b border-gray-800">
+                           <h2 className="text-xl font-bold tracking-tight">Provista Hub</h2>
+                           <p className="text-xs text-gray-400 mt-1">Billing & Compliance</p>
+                        </div>
+                        <nav className="p-4 space-y-2">
+                            <button onClick={() => setView('list')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${view === 'list' ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}>
+                                <LayoutDashboard size={18} /> Invoices
+                            </button>
+                        </nav>
+                        <div className="p-4 mt-auto border-t border-gray-800">
+                            <div className="flex items-center gap-3 mb-4 px-2">
+                                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center"><UserCircle size={20} /></div>
+                                <div><p className="text-sm font-bold">{user.name}</p><p className="text-xs text-gray-500">{roleInfo.label}</p></div>
+                            </div>
+                            <button onClick={logout} className="w-full flex items-center gap-2 text-red-400 hover:text-red-300 px-2 text-sm"><LogOut size={16} /> Sign Out</button>
+                        </div>
+                    </aside>
+                    <main className="flex-grow overflow-auto h-screen">
+                        {view === 'list' && (
+                            <InvoiceList 
+                                onEdit={(inv) => { setActiveInvoice(inv); setView('edit'); }}
+                                onCreate={() => { setActiveInvoice(null); setView('create'); }}
+                            />
+                        )}
+                        {(view === 'create' || view === 'edit') && (
+                            <InvoiceEditor invoice={activeInvoice} onBack={() => { setView('list'); }} />
+                        )}
+                    </main>
+                </div>
+            );
+        }
+
+        function InvoiceList({ onEdit, onCreate }) {
+            const { invoices, refreshData, loading } = useContext(DataContext);
+            const { user } = useContext(AuthContext);
+            const [term, setTerm] = useState('');
+            const [period, setPeriod] = useState('ALL');
+
+            const roleInfo = ROLES[user.role] || ROLES.VIEWER;
+            const canWrite = roleInfo.permissions.includes('write');
+            const canDelete = roleInfo.permissions.includes('delete');
+            const canExport = roleInfo.permissions.includes('export');
+
+            const filtered = useMemo(() => {
+                if (!Array.isArray(invoices)) return [];
+                let list = invoices;
+                const now = new Date();
+                try {
+                    if (period === 'MONTH') {
+                        list = list.filter(i => new Date(i.date).getMonth() === now.getMonth() && new Date(i.date).getFullYear() === now.getFullYear());
+                    } else if (period === 'LAST_MONTH') {
+                        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                        list = list.filter(i => new Date(i.date).getMonth() === lastMonth.getMonth() && new Date(i.date).getFullYear() === lastMonth.getFullYear());
+                    } else if (period === 'FY') {
+                        const currentYear = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
+                        const fyStart = new Date(currentYear, 3, 1);
+                        const fyEnd = new Date(currentYear + 1, 2, 31);
+                        list = list.filter(i => { const d = new Date(i.date); return d >= fyStart && d <= fyEnd; });
+                    }
+                    return list.filter(inv => 
+                        (inv.invoiceNo || '').toLowerCase().includes(term.toLowerCase()) || 
+                        (inv.clientName || '').toLowerCase().includes(term.toLowerCase())
+                    );
+                } catch(e) { return []; }
+            }, [invoices, term, period]);
+
+            const handleDelete = async (id) => {
+                if (confirm("Are you sure? This action is logged.")) {
+                    await api.invoices.delete(id);
+                    refreshData();
+                }
+            };
+
+            const handleExcelExport = () => {
+                if (!filtered.length) return alert("No invoices to export.");
+                const headers = ["Invoice No", "Date", "Client", "GSTIN", "Type", "Status", "SubTotal", "Tax", "Grand Total"];
+                const csvContent = [
+                    headers.join(","),
+                    ...filtered.map(inv => [
+                        inv.invoiceNo,
+                        inv.date,
+                        `"${inv.clientName.replace(/"/g, '""')}"`, 
+                        inv.clientGst || "N/A",
+                        inv.type,
+                        inv.status,
+                        inv.subTotal,
+                        (inv.grandTotal - inv.subTotal).toFixed(2),
+                        inv.grandTotal
+                    ].join(","))
+                ].join("\n");
+
+                const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `ProvistaHub_Excel_Export_${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            const handleSystemExport = () => {
+                if (!invoices.length) return alert("No data to export.");
+                const dataStr = JSON.stringify(invoices, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `ProvistaHub_System_Backup_${new Date().toISOString().split('T')[0]}.json`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            return (
+                <div className="p-8">
+                    <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                        <div><h1 className="text-2xl font-bold text-gray-800">Invoices</h1><p className="text-gray-500 text-sm">Manage billing and compliance</p></div>
+                        <div className="flex gap-3">
+                           {canExport && (
+                                <>
+                                    <button onClick={handleSystemExport} className="flex items-center gap-2 px-4 py-2 bg-gray-100 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium shadow-sm transition-colors">
+                                        <Database size={16} /> System Backup
+                                    </button>
+                                    <button onClick={handleExcelExport} className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 text-green-700 rounded-lg hover:bg-green-100 text-sm font-medium shadow-sm transition-colors">
+                                        <FileSpreadsheet size={16} /> Export Excel
+                                    </button>
+                                </>
+                           )}
+                           {canWrite && <button onClick={onCreate} className="flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 text-sm font-medium shadow-sm"><Plus size={16} /> New Invoice</button>}
+                        </div>
+                    </header>
+
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="p-4 border-b border-gray-200 bg-gray-50 flex gap-4 flex-wrap">
+                            <select value={period} onChange={(e) => setPeriod(e.target.value)} className="border border-gray-300 text-gray-700 text-sm rounded-lg p-2.5 focus:ring-green-500 focus:border-green-500">
+                                <option value="ALL">All Time</option>
+                                <option value="MONTH">This Month</option>
+                                <option value="LAST_MONTH">Last Month</option>
+                                <option value="FY">Current Financial Year</option>
+                            </select>
+                            <div className="relative flex-grow max-w-md">
+                                <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                                <input type="text" placeholder="Search..." className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-green-500 focus:border-green-500" value={term} onChange={e => setTerm(e.target.value)}/>
+                            </div>
+                        </div>
+
+                        {loading ? <div className="p-8 text-center"><Loader2 className="animate-spin mx-auto text-green-600" /></div> : (
+                            <table className="w-full text-left">
+                                <thead className="bg-gray-50 text-xs uppercase text-gray-500 font-semibold">
+                                    <tr>
+                                        <th className="p-4">Status</th>
+                                        <th className="p-4">Type</th>
+                                        <th className="p-4">Invoice #</th>
+                                        <th className="p-4">Date</th>
+                                        <th className="p-4">Client</th>
+                                        <th className="p-4 text-right">Amount</th>
+                                        <th className="p-4 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {filtered.length === 0 && <tr><td colSpan="7" className="p-8 text-center text-gray-400">No records found.</td></tr>}
+                                    {filtered.map(inv => {
+                                        const status = INVOICE_STATUS[inv.status] || INVOICE_STATUS.DRAFT;
+                                        const type = INVOICE_TYPES[inv.type] || INVOICE_TYPES.TAX;
+                                        return (
+                                        <tr key={inv.id} className="hover:bg-gray-50 transition-colors">
+                                            <td className="p-4"><span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${status.color}`}>{status.label}</span></td>
+                                            <td className="p-4"><span className={`text-xs font-bold ${type.color}`}>{type.label}</span></td>
+                                            <td className="p-4 font-mono text-sm text-gray-900">{inv.invoiceNo}</td>
+                                            <td className="p-4 text-sm text-gray-500">{formatDate(inv.date)}</td>
+                                            <td className="p-4 font-medium text-gray-900">{inv.clientName}</td>
+                                            <td className="p-4 text-right font-mono text-sm">{formatCurrency(inv.grandTotal)}</td>
+                                            <td className="p-4 flex justify-center gap-2">
+                                                <button onClick={() => onEdit(inv)} className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg"><FileText size={16} /></button>
+                                                {canDelete && inv.status === 'DRAFT' && <button onClick={() => handleDelete(inv.id)} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>}
+                                            </td>
+                                        </tr>
+                                    )})}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        function InvoiceEditor({ invoice, onBack }) {
+            const { user } = useContext(AuthContext);
+            const { refreshData } = useContext(DataContext);
+            const [saving, setSaving] = useState(false);
+            const roleInfo = ROLES[user.role] || ROLES.VIEWER;
+
+            const isNew = !invoice;
+            const isFinal = invoice?.status === 'FINAL' || invoice?.status === 'PAID';
+            const isCreditNote = invoice?.type === 'CREDIT_NOTE';
+            const canEdit = !isFinal && roleInfo.permissions.includes('write');
+            const canFinalize = roleInfo.permissions.includes('finalize');
+            const [showEmailModal, setShowEmailModal] = useState(false);
+            const [showDeliveryLogs, setShowDeliveryLogs] = useState(false);
+            const [logs, setLogs] = useState([]);
+            
+            const [form, setForm] = useState(invoice ? { 
+                ...invoice, 
+                amountPaid: String(invoice.amountPaid || 0),
+                poNo: invoice.poNo || '',
+                poDate: invoice.poDate || '',
+                clientName: invoice.clientName || '',
+                clientAddress: invoice.clientAddress || '',
+                clientGst: invoice.clientGst || '',
+                clientEmail: invoice.clientEmail || '',
+                clientPhone: invoice.clientPhone || '',
+                panNo: invoice.panNo || 'AANFC3887G',
+                stateCode: invoice.stateCode || '1223',
+                tanNo: invoice.tanNo || 'PNEC12980C',
+                signatureImg: invoice.signatureImg || SIGNATURE_SRC,
+                stampImg: invoice.stampImg || STAMP_SRC
+            } : {
+                id: `temp_${Date.now()}`,
+                status: 'DRAFT',
+                type: 'TAX', 
+                invoiceNo: 'DRAFT', 
+                date: new Date().toISOString().split('T')[0],
+                poNo: '', poDate: '',
+                clientName: '', clientAddress: '', clientGst: '', clientEmail: '', clientPhone: '', placeOfSupply: 'Intra-State',
+                panNo: 'AANFC3887G', stateCode: '1223', tanNo: 'PNEC12980C',
+                items: [{ id: Date.now(), serviceId: '', desc: '', sac: '', price: 0, qty: 1 }],
+                amountPaid: "0",
+                auditLog: [], emailLog: [], pdfGenerated: false, refInvoice: null,
+                bankName: DEFAULT_COMPANY.bankName,
+                accountNo: DEFAULT_COMPANY.accountNo,
+                ifsc: DEFAULT_COMPANY.ifsc,
+                signatureImg: SIGNATURE_SRC,
+                stampImg: STAMP_SRC
+            });
+
+            // Signature Logic
+            const [signature, setSignature] = useState(localStorage.getItem('pvh_signature') || '');
+
+            const handleSignatureUpload = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const base64 = reader.result;
+                        setSignature(base64);
+                        localStorage.setItem('pvh_signature', base64);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            useEffect(() => {
+               if(invoice) {
+                   api.delivery.getLogs(invoice.id).then(setLogs);
+               }
+            }, [invoice]);
+
+            const groupedServices = useMemo(() => {
+                const groups = {};
+                MASTER_CATALOG.forEach(item => {
+                    if (!groups[item.category]) groups[item.category] = [];
+                    groups[item.category].push(item);
+                });
+                return groups;
+            }, []);
+
+            const subTotal = form.items.reduce((sum, item) => sum + (Number(item.price || 0) * Number(item.qty || 0)), 0);
+            const isIntra = form.placeOfSupply === 'Intra-State';
+            const taxes = isIntra ? { cgst: subTotal * 0.09, sgst: subTotal * 0.09, igst: 0 } : { cgst: 0, sgst: 0, igst: subTotal * 0.18 };
+            const grandTotal = subTotal + taxes.cgst + taxes.sgst + taxes.igst;
+            
+            const amountPaidNum = parseFloat(form.amountPaid) || 0;
+            const balanceDue = grandTotal - amountPaidNum;
+
+            const handleItemChange = (id, field, value) => {
+                if (!canEdit) return;
+                setForm(prev => ({
+                    ...prev,
+                    items: prev.items.map(item => {
+                        if (item.id !== id) return item;
+                        if (field === 'serviceId') {
+                            if (value === 'custom') return { ...item, serviceId: 'custom', desc: '', price: 0, sac: '' }; 
+                            if (value.startsWith('custom_')) {
+                                const catName = value.replace('custom_', '');
+                                return { ...item, serviceId: 'custom', desc: `Custom ${catName} Service`, price: 0, sac: '' };
+                            }
+                            const service = MASTER_CATALOG.find(s => s.id === value);
+                            if (!service) return { ...item, serviceId: value }; 
+                            return { ...item, serviceId: value, desc: service.name, price: service.price, sac: service.sac };
+                        }
+                        return { ...item, [field]: value };
+                    })
+                }));
+            };
+
+            const addItem = () => { if (!canEdit) return; setForm(prev => ({ ...prev, items: [...prev.items, { id: Date.now(), serviceId: '', desc: '', sac: '', price: 0, qty: 1 }] })); };
+            const removeItem = (id) => { if (!canEdit) return; setForm(prev => ({ ...prev, items: prev.items.filter(i => i.id !== id) })); };
+
+            const handleImageUpload = (e, field) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setForm(prev => ({ ...prev, [field]: reader.result }));
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const saveInvoice = async (newStatus = form.status) => {
+                if (newStatus === 'FINAL' && form.clientEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.clientEmail)) {
+                    alert("Invalid Email Format.");
+                    return;
+                }
+                setSaving(true);
+                try {
+                    const logEntry = {
+                        action: newStatus === 'FINAL' && form.status === 'DRAFT' ? 'FINALIZED' : (isNew ? 'CREATED' : 'UPDATED'),
+                        user: user.name, timestamp: new Date().toISOString()
+                    };
+                    const payload = {
+                        ...form, 
+                        status: newStatus,
+                        amountPaid: amountPaidNum, 
+                        auditLog: [...(form.auditLog || []), logEntry]
+                    };
+                    const savedData = await api.invoices.save(payload);
+                    
+                    // --- AUTO DELIVERY LOGIC ---
+                    if (newStatus === 'FINAL') {
+                        // Sequential execution to ensure order
+                        
+                        // Send Email if available
+                        if (form.clientEmail) {
+                            await api.delivery.send('EMAIL', form.clientEmail, savedData);
+                        }
+                        
+                        // Send WhatsApp if available
+                        if (form.clientPhone) {
+                            // Logically "after email"
+                            await api.delivery.send('WHATSAPP', form.clientPhone, savedData);
+                        }
+
+                        if (form.clientEmail || form.clientPhone) {
+                            alert("Invoice Finalized. Auto-delivery initiated.");
+                        } else {
+                            alert("Invoice Finalized.");
+                        }
+                    } else {
+                        // Just saved draft
+                        setForm({ ...savedData, amountPaid: String(savedData.amountPaid) });
+                    }
+                    // ---------------------------
+
+                    await refreshData();
+                    setSaving(false);
+                    if (newStatus === 'FINAL') onBack();
+                    
+                } catch (err) {
+                    alert(err.message);
+                    setSaving(false);
+                }
+            };
+
+            const handleSendDelivery = async (type) => {
+                if(!isFinal) { alert("Please finalize invoice first."); return; }
+                const recipient = type === 'EMAIL' ? form.clientEmail : form.clientPhone;
+                if(!recipient) { alert(`Client ${type === 'EMAIL' ? 'Email' : 'Phone'} missing.`); return; }
+                
+                if(!confirm(`Send Invoice via ${type === 'EMAIL' ? 'SendGrid' : 'WhatsApp'} to ${recipient}?`)) return;
+
+                const res = await api.delivery.send(type, recipient, form);
+                const updatedLogs = await api.delivery.getLogs(form.id);
+                setLogs(updatedLogs);
+                if(res.success) alert("Sent successfully!");
+                else alert("Sending failed. Check logs.");
+            };
+
+            const handleRetry = async (logId) => {
+                const res = await api.delivery.retry(logId);
+                const updatedLogs = await api.delivery.getLogs(form.id);
+                setLogs(updatedLogs);
+                if(res) alert("Retry successful!");
+            };
+
+            const status = INVOICE_STATUS[form.status] || INVOICE_STATUS.DRAFT;
+            const type = INVOICE_TYPES[form.type] || INVOICE_TYPES.TAX;
+
+            return (
+                <div className="flex flex-col h-screen bg-gray-100">
+                    <div className="bg-white border-b border-gray-200 p-4 flex justify-between items-center shadow-sm z-10 no-print">
+                        <div className="flex items-center gap-4">
+                            <button onClick={onBack} className="text-gray-500 hover:text-gray-800 flex items-center gap-1"><ChevronLeft size={20} /> Back</button>
+                            <div className="h-6 w-px bg-gray-300"></div>
+                            <div>
+                                <h1 className="text-lg font-bold text-gray-800">{isNew ? 'New Invoice' : form.invoiceNo}</h1>
+                                <div className="flex items-center gap-2">
+                                   <span className={`text-xs font-bold px-2 py-0.5 rounded ${status.color}`}>{status.label}</span>
+                                   <span className={`text-xs font-bold px-2 py-0.5 rounded ${type.color} bg-gray-50 border`}>{type.label}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {canEdit && !isCreditNote && (
+                                <select value={form.type} onChange={e => setForm({...form, type: e.target.value})} className="bg-gray-50 border border-gray-300 text-sm rounded-lg p-2.5">
+                                   <option value="TAX">Tax Invoice</option>
+                                   <option value="PROFORMA">Proforma Invoice</option>
+                                </select>
+                            )}
+                            {form.pdfUrl && <button onClick={() => window.open(form.pdfUrl, '_blank')} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg border border-blue-200"><FileCheck size={20} /></button>}
+                            <button onClick={() => window.print()} className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"><Printer size={20} /></button>
+                            {!isFinal && canEdit && <button onClick={() => saveInvoice('DRAFT')} disabled={saving} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50">{saving ? 'Saving...' : 'Save Draft'}</button>}
+                            {!isFinal && canFinalize && <button onClick={() => { if(confirm("Finalize invoice?")) saveInvoice('FINAL'); }} disabled={saving} className="flex items-center gap-2 px-4 py-2 bg-green-700 text-white font-medium rounded-lg hover:bg-green-800 shadow-sm">
+                                {saving ? <Loader2 className="animate-spin" size={18} /> : <Lock size={18} />} Finalize
+                            </button>}
+                            {isFinal && <button onClick={() => setShowEmailModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 shadow-sm"><Send size={18} /> Email</button>}
+                        </div>
+                    </div>
+
+                    <div className="flex-grow overflow-auto p-8 flex flex-col items-center print:p-0">
+                        <div className="print-container">
+                            {/* CHANGED: Added 'flex flex-col' to container to manage footer positioning naturally */}
+                            <div className="bg-white w-[210mm] min-h-[297mm] shadow-xl p-[10mm] flex flex-col relative print:shadow-none print:w-full print:h-auto print:min-h-screen">
+                                <header className="flex justify-between items-start mb-6 border-b-2 border-gray-900 pb-6">
+                                    <div className="w-1/2">
+                                        <div className="space-y-1">
+                                            <p className="font-bold tracking-wide" style={{ fontSize: '47.1px', lineHeight: '1' }}>
+                                                <span style={{ color: '#61f29c' }}>ProVista</span>
+                                                <span className="text-gray-900"> Hub</span>
+                                            </p>
+                                            <p className="text-gray-800 text-sm font-medium">{DEFAULT_COMPANY.address}</p>
+                                            <div className="text-gray-800 text-sm font-medium pt-1 space-y-0.5">
+                                                <p>Email: {DEFAULT_COMPANY.email}</p>
+                                                <p>Web: www.provistahub.com</p>
+                                                <p>Phone: {DEFAULT_COMPANY.phone}</p>
+                                            </div>
+                                            <p className="font-bold text-gray-900 text-sm pt-1">GSTIN: {DEFAULT_COMPANY.gstin}</p>
+                                        </div>
+                                    </div>
+                                    <div className="w-1/2 text-right">
+                                        <h2 className={`text-4xl font-black uppercase tracking-widest ${isCreditNote ? 'text-red-600' : 'text-gray-900'}`}>{type.label}</h2>
+                                        
+                                        <div className="mt-4 grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-sm items-center justify-end text-gray-900">
+                                            <span className="font-bold">Invoice No:</span> 
+                                            <div className="font-mono font-bold text-base">
+                                                {canEdit ? (
+                                                    <input 
+                                                        type="text" 
+                                                        value={form.invoiceNo} 
+                                                        onChange={e => setForm({...form, invoiceNo: e.target.value})} 
+                                                        className="text-right border-b border-gray-300 focus:border-green-500 outline-none w-32 bg-transparent print:hidden"
+                                                    />
+                                                ) : null}
+                                                <span className={canEdit ? 'hidden print:inline' : ''}>{form.invoiceNo}</span>
+                                            </div>
+
+                                            <span className="font-bold">Date:</span>
+                                            <div>
+                                                {canEdit ? <input type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})} className="border rounded px-1 py-0.5 text-right print:hidden text-xs"/> : null}
+                                                <span className={canEdit ? 'hidden print:inline font-bold' : 'font-bold'}>{formatDate(form.date)}</span>
+                                            </div>
+
+                                            <div className="col-span-2 h-px bg-gray-300 my-1"></div>
+
+                                            <span className="font-bold">PO No:</span>
+                                            <div>
+                                                {canEdit ? <input type="text" placeholder="PO Number" value={form.poNo} onChange={e => setForm({...form, poNo: e.target.value})} className="border-b text-right w-32 outline-none print:hidden text-xs"/> : null}
+                                                <span className={canEdit ? 'hidden print:inline font-medium' : 'font-medium'}>{form.poNo || '-'}</span>
+                                            </div>
+
+                                            <span className="font-bold">PO Date:</span>
+                                            <div>
+                                                {canEdit ? <input type="date" value={form.poDate} onChange={e => setForm({...form, poDate: e.target.value})} className="border rounded px-1 py-0.5 text-right print:hidden text-xs"/> : null}
+                                                <span className={canEdit ? 'hidden print:inline font-medium' : 'font-medium'}>{formatDate(form.poDate) || '-'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </header>
+
+                                <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200 print:bg-white print:border-gray-300">
+                                    <div className="grid grid-cols-1 gap-8 relative">
+                                        <div className="relative">
+                                            <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 border-b pb-1">Details of Receiver (Billed To)</h3>
+                                            {canEdit ? (
+                                                <div className="space-y-2 print:hidden">
+                                                    <input placeholder="Client Name" className="w-full border p-1 rounded font-bold text-sm" value={form.clientName} onChange={e => setForm({...form, clientName: e.target.value})} />
+                                                    <textarea placeholder="Billing Address" className="w-full border p-1 rounded text-xs h-16" value={form.clientAddress} onChange={e => setForm({...form, clientAddress: e.target.value})} />
+                                                    <input placeholder="GSTIN" className="w-full border p-1 rounded text-xs" value={form.clientGst} onChange={e => setForm({...form, clientGst: e.target.value})} />
+                                                    <input placeholder="Email" className="w-full border p-1 rounded text-xs" value={form.clientEmail} onChange={e => setForm({...form, clientEmail: e.target.value})} />
+                                                    <input placeholder="Phone" className="w-full border p-1 rounded text-xs" value={form.clientPhone} onChange={e => setForm({...form, clientPhone: e.target.value})} />
+                                                </div>
+                                            ) : null}
+                                            <div className={canEdit ? 'hidden print:block' : ''}>
+                                                <p className="font-bold text-gray-900">{form.clientName}</p>
+                                                <p className="text-gray-600 text-xs whitespace-pre-line leading-snug">{form.clientAddress}</p>
+                                                {form.clientGst && <p className="text-xs mt-1"><span className="text-gray-500">GSTIN:</span> {form.clientGst}</p>}
+                                                {form.clientEmail && <p className="text-xs text-gray-500">{form.clientEmail}</p>}
+                                                {form.clientPhone && <p className="text-xs text-gray-500">{form.clientPhone}</p>}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4 pt-4 border-t border-gray-200">
+                                        <div className="grid grid-cols-4 gap-4 text-xs">
+                                            <div>
+                                                <span className="text-gray-500 block">PAN No:</span>
+                                                {canEdit ? <input className="border-b w-full" value={form.panNo} onChange={e => setForm({...form, panNo: e.target.value})} placeholder="-" /> : <span className="font-medium">{form.panNo || '-'}</span>}
+                                            </div>
+                                            <div>
+                                                <span className="text-gray-500 block">State Code:</span>
+                                                {canEdit ? <input className="border-b w-full" value={form.stateCode} onChange={e => setForm({...form, stateCode: e.target.value})} placeholder="-" /> : <span className="font-medium">{form.stateCode || '-'}</span>}
+                                            </div>
+                                            <div>
+                                                <span className="text-gray-500 block">TAN No:</span>
+                                                {canEdit ? <input className="border-b w-full" value={form.tanNo} onChange={e => setForm({...form, tanNo: e.target.value})} placeholder="-" /> : <span className="font-medium">{form.tanNo || '-'}</span>}
+                                            </div>
+                                            <div>
+                                                <span className="text-gray-500 block">Place of Supply:</span>
+                                                {canEdit ? (
+                                                    <select 
+                                                        className="border-b w-full bg-transparent outline-none" 
+                                                        value={form.placeOfSupply} 
+                                                        onChange={e => setForm({...form, placeOfSupply: e.target.value})}
+                                                    >
+                                                        <option value="Intra-State">Intra-State (Local)</option>
+                                                        <option value="Inter-State">Inter-State (Outside)</option>
+                                                    </select>
+                                                ) : (
+                                                    <span className="font-medium">{form.placeOfSupply}</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <table className="w-full mb-6">
+                                    <thead className="bg-green-800 text-white text-[10px] uppercase">
+                                        <tr><th className="p-2 text-left w-10 rounded-tl-lg">#</th><th className="p-2 text-left">Description of Services</th><th className="p-2 text-center w-20">SAC</th><th className="p-2 text-center w-12">Qty</th><th className="p-2 text-right w-24 rounded-tr-lg">Amount</th>{canEdit && <th className="p-2 w-8 bg-white print:hidden"></th>}</tr>
+                                    </thead>
+                                    <tbody className="text-sm">
+                                        {form.items.map((item, i) => (
+                                            <tr key={item.id} className="border-b border-gray-100 last:border-0 group">
+                                                <td className="p-2 text-gray-500 align-top">{i+1}</td>
+                                                <td className="p-2 align-top">
+                                                    {canEdit ? (
+                                                        <>
+                                                            <div className="space-y-1 print:hidden">
+                                                                <select className="w-full border p-1 rounded text-xs font-bold text-gray-700 bg-gray-50" value={item.serviceId} onChange={e => handleItemChange(item.id, 'serviceId', e.target.value)}>
+                                                                    <option value="">Select Service...</option>
+                                                                    <option value="custom">✨ Custom Item</option>
+                                                                    {Object.entries(groupedServices).map(([category, items]) => (
+                                                                        <optgroup key={category} label={category}>
+                                                                            <option value={`custom_${category}`}>➕ Custom {category}</option>
+                                                                            {items.map(catItem => <option key={catItem.id} value={catItem.id}>{catItem.name}</option>)}
+                                                                        </optgroup>
+                                                                    ))}
+                                                                </select>
+                                                                <input className="w-full border-b border-gray-300 p-1 text-sm focus:border-green-500 outline-none" value={item.desc} onChange={e => handleItemChange(item.id, 'desc', e.target.value)}/>
+                                                            </div>
+                                                            <span className="font-medium hidden print:block text-xs">{item.desc}</span>
+                                                        </>
+                                                    ) : <span className="font-medium text-xs">{item.desc}</span>}
+                                                </td>
+                                                <td className="p-2 text-center align-top font-mono text-gray-500 text-xs">{item.sac}</td>
+                                                <td className="p-2 text-center align-top">{canEdit ? <input type="number" className="w-10 text-center border p-1 rounded print:hidden text-xs" value={item.qty} onChange={e => handleItemChange(item.id, 'qty', e.target.value)} /> : null} <span className={canEdit ? 'hidden print:inline' : ''}>{item.qty}</span></td>
+                                                <td className="p-2 text-right font-mono align-top">{canEdit ? <input type="number" className="w-20 text-right border p-1 rounded print:hidden text-xs" value={item.price} onChange={e => handleItemChange(item.id, 'price', e.target.value)} /> : null} <span className={canEdit ? 'hidden print:inline' : ''}>{formatCurrency(item.price)}</span></td>
+                                                {canEdit && <td className="p-2 align-top print:hidden"><button onClick={() => removeItem(item.id)} className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100"><Trash2 size={14} /></button></td>}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+
+                                {canEdit && <button onClick={addItem} className="mb-6 flex items-center gap-2 text-xs text-green-700 font-bold hover:bg-green-50 px-3 py-1.5 rounded transition-colors print:hidden"><Plus size={14} /> Add Line Item</button>}
+
+                                <div className="flex justify-end mb-6">
+                                    <div className="w-5/12 text-sm">
+                                        <div className="flex justify-between py-1 border-b border-gray-100"><span>Taxable Value</span><span>{formatCurrency(subTotal)}</span></div>
+                                        {isIntra ? (
+                                            <>
+                                                <div className="flex justify-between py-1 border-b border-gray-100 text-gray-600"><span>CGST (9%)</span><span>{formatCurrency(taxes.cgst)}</span></div>
+                                                <div className="flex justify-between py-1 border-b border-gray-100 text-gray-600"><span>SGST (9%)</span><span>{formatCurrency(taxes.sgst)}</span></div>
+                                            </>
+                                        ) : <div className="flex justify-between py-1 border-b border-gray-100 text-gray-600"><span>IGST (18%)</span><span>{formatCurrency(taxes.igst)}</span></div>}
+                                        
+                                        <div className="flex justify-between py-2 border-b-2 border-green-800 items-end mt-2">
+                                            <span className="font-bold text-green-900">Total Amount</span>
+                                            <span className="text-lg font-bold text-green-900">{formatCurrency(grandTotal)}</span>
+                                        </div>
+
+                                        <div className="mt-4 pt-2 border-t border-gray-100 space-y-2">
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-gray-600">Amount Paid (₹)</span>
+                                                <div className="flex items-center">
+                                                    {canEdit ? (
+                                                        <input 
+                                                            type="text" 
+                                                            className="w-24 text-right border-b border-gray-300 focus:border-green-500 outline-none print:hidden font-medium bg-transparent"
+                                                            value={form.amountPaid} 
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                if (val === "" || /^[0-9]*\.?[0-9]*$/.test(val)) {
+                                                                    setForm(prev => ({...prev, amountPaid: val}));
+                                                                }
+                                                            }}
+                                                            placeholder="0"
+                                                        />
+                                                    ) : null}
+                                                    <span className={`font-medium text-gray-800 ${canEdit ? 'hidden print:block' : ''}`}>
+                                                        {formatCurrency(amountPaidNum)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-between items-center text-sm font-bold border-t border-gray-100 pt-2">
+                                                <span className="text-gray-800 uppercase text-xs tracking-wider">Balance Amount (₹)</span>
+                                                <span className={`${balanceDue > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                                    {formatCurrency(balanceDue)}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-2 text-right"><p className="text-[10px] text-gray-500 uppercase tracking-widest">Amount in Words</p><p className="text-xs font-medium italic text-gray-700">{numberToWords(Math.round(grandTotal))}</p></div>
+                                    </div>
+                                </div>
+
+                                {/* CHANGED: Footer now uses mt-auto to sit at bottom but flow after content if content is long */}
+                                <div className="mt-auto w-full">
+                                    <div className="grid grid-cols-2 gap-8 items-end">
+                                        <div className="text-xs text-gray-600">
+                                            <h4 className="font-bold mb-1 text-gray-800 uppercase text-[10px]">Bank Details</h4>
+                                            <div className="flex"><span className="w-12 text-gray-400">Bank:</span> {canEdit ? <input className="border-b bg-transparent w-32 print:hidden" value={form.bankName} onChange={e => setForm({...form, bankName: e.target.value})} /> : null} <span className={canEdit ? 'hidden print:inline' : ''}>{form.bankName}</span></div>
+                                            <div className="flex"><span className="w-12 text-gray-400">A/C:</span> {canEdit ? <input className="border-b bg-transparent w-32 print:hidden" value={form.accountNo} onChange={e => setForm({...form, accountNo: e.target.value})} /> : null} <span className={canEdit ? 'hidden print:inline' : ''}>{form.accountNo}</span></div>
+                                            <div className="flex"><span className="w-12 text-gray-400">IFSC:</span> {canEdit ? <input className="border-b bg-transparent w-32 print:hidden" value={form.ifsc} onChange={e => setForm({...form, ifsc: e.target.value})} /> : null} <span className={canEdit ? 'hidden print:inline' : ''}>{form.ifsc}</span></div>
+                                        </div>
+                                        <div className="text-right relative">
+                                            <p className="font-bold text-sm text-gray-800">For {DEFAULT_COMPANY.name}</p>
+                                            <div className="h-24 flex flex-col justify-end items-end my-1">
+                                                {signature ? (
+                                                    <div className="relative group">
+                                                        {/* CHANGED: Added mix-blend-multiply for transparency */}
+                                                        <img src={signature} alt="Signature" className="h-20 object-contain mix-blend-multiply" />
+                                                        {canEdit && <button onClick={() => {setSignature(''); localStorage.removeItem('pvh_signature')}} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={12}/></button>}
+                                                    </div>
+                                                ) : (
+                                                    canEdit && (
+                                                        <label className="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-400 text-[10px] px-2 py-8 rounded border border-dashed border-gray-300 w-32 flex flex-col items-center justify-center gap-1 transition-colors">
+                                                            <Upload size={14} /> 
+                                                            <span>Upload Sign/Stamp</span>
+                                                            <input type="file" accept="image/*" className="hidden" onChange={handleSignatureUpload} />
+                                                        </label>
+                                                    )
+                                                )}
+                                            </div>
+                                            <p className="text-[10px] text-gray-500">(Authorized Signatory)</p>
+                                        </div>
+                                    </div>
+                                    <div className="mt-6 pt-2 border-t border-gray-100 text-center text-[10px] text-gray-400">
+                                        This is a computer-generated invoice and does not require a physical signature.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="hidden print:block page-break bg-white w-full p-[10mm] terms-page">
+                                <header className="flex justify-between items-start mb-8 border-b-2 border-gray-300 pb-6">
+                                    <h2 className="text-xl font-bold text-gray-500 uppercase tracking-widest">Terms & Conditions</h2>
+                                </header>
+                                <div className="text-sm text-gray-700 space-y-6 text-justify leading-relaxed">
+                                    <p className="font-medium">Welcome to <strong>ProVista Hub</strong>. By engaging with our services, you agree to the following terms:</p>
+                                    <section>
+                                        <h3 className="font-bold text-gray-900 mb-2">1. Services</h3>
+                                        <p>ProVista Hub provides digital solutions including Web Dev, SEO, Branding, and AI Automation. We modify or discontinue services based on project requirements.</p>
+                                    </section>
+                                    <section>
+                                        <h3 className="font-bold text-gray-900 mb-2">2. Payment</h3>
+                                        <ul className="list-disc pl-5 space-y-1">
+                                            <li>A 50% deposit is required to start any project.</li>
+                                            <li>Balance is due upon project completion and before final handover.</li>
+                                        </ul>
+                                    </section>
+                                    <section>
+                                        <h3 className="font-bold text-gray-900 mb-2">3. Property Rights</h3>
+                                        <p>Intellectual property is transferred upon full payment. ProVista Hub retains rights to its internal proprietary tools.</p>
+                                    </section>
+                                    <div className="mt-12 text-center text-xs text-gray-400">
+                                        <p>Visit provistahub.com/legal.html for full terms.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Communication Logs Panel */}
+                        {isFinal && (
+                            <div className="mt-8 w-[210mm] bg-white rounded-xl shadow-sm border border-gray-200 no-print overflow-hidden">
+                                <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                                    <div>
+                                        <h3 className="font-bold text-gray-800 flex items-center gap-2"><History size={18}/> Communication Logs</h3>
+                                        <p className="text-xs text-gray-500">Track email and message delivery attempts</p>
+                                    </div>
+                                    <button onClick={() => api.delivery.getLogs(form.id).then(setLogs)} className="text-gray-500 hover:text-green-600"><RefreshCw size={16}/></button>
+                                </div>
+                                <div className="p-0">
+                                    {logs.length === 0 ? (
+                                        <div className="p-8 text-center text-gray-400 text-sm">No communication history yet.</div>
+                                    ) : (
+                                        <table className="w-full text-left text-sm">
+                                            <thead className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
+                                                <tr>
+                                                    <th className="px-6 py-3">Time</th>
+                                                    <th className="px-6 py-3">Type</th>
+                                                    <th className="px-6 py-3">Recipient</th>
+                                                    <th className="px-6 py-3">Status</th>
+                                                    <th className="px-6 py-3 text-right">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100">
+                                                {logs.map(log => (
+                                                    <tr key={log.id} className="hover:bg-gray-50">
+                                                        <td className="px-6 py-3 text-gray-500 text-xs">{new Date(log.timestamp).toLocaleString()}</td>
+                                                        <td className="px-6 py-3 font-medium flex items-center gap-2">
+                                                            {log.type === 'EMAIL' ? <Mail size={14} className="text-blue-500"/> : <MessageSquare size={14} className="text-green-500"/>}
+                                                            {log.provider}
+                                                        </td>
+                                                        <td className="px-6 py-3 text-gray-600 font-mono text-xs">{log.recipient}</td>
+                                                        <td className="px-6 py-3">
+                                                            {log.status === 'SENT' && <span className="inline-flex items-center gap-1 text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded"><CheckCircle size={12}/> Sent</span>}
+                                                            {log.status === 'PENDING' && <span className="inline-flex items-center gap-1 text-xs font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded"><Loader2 size={12} className="animate-spin"/> Sending...</span>}
+                                                            {log.status === 'FAILED' && <span className="inline-flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded" title={log.error}><AlertCircle size={12}/> Failed</span>}
+                                                        </td>
+                                                        <td className="px-6 py-3 text-right">
+                                                            {log.status === 'FAILED' && (
+                                                                <button onClick={() => handleRetry(log.id)} className="text-blue-600 hover:text-blue-800 text-xs font-medium hover:underline">Retry</button>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    {showEmailModal && <EmailModal clientEmail={form.clientEmail} invoiceNo={form.invoiceNo} onClose={() => setShowEmailModal(false)} onSend={(email) => { alert('Email sent to: ' + email); setShowEmailModal(false); }} />}
+                </div>
+            );
+        }
+
+        function EmailModal({ clientEmail, invoiceNo, onClose, onSend }) {
+            const [to, setTo] = useState(clientEmail);
+            const [sending, setSending] = useState(false);
+            const handleSend = () => { setSending(true); setTimeout(() => { onSend(to); setSending(false); }, 1500); };
+            return (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
+                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-gray-800"><Mail size={20} className="text-blue-600" /> Send Invoice</h3>
+                        <div className="space-y-4">
+                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Recipient Email:</label><input className="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none" value={to} onChange={e => setTo(e.target.value)} /></div>
+                            <div className="flex gap-2 justify-end mt-4">
+                                <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded font-medium">Cancel</button>
+                                <button onClick={handleSend} disabled={sending} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 font-medium">{sending ? 'Sending...' : 'Send Invoice'}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
